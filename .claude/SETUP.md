@@ -165,6 +165,7 @@ P1-T1 完了時点での lockfile 確定バージョン：
 | @sveltejs/vite-plugin-svelte | 5.0.3 |
 | vite | 6.0.5+ |
 | vitest | 2.1.9 |
+| @vitest/coverage-v8 | 2.1.9 |
 | eslint | 9.39.4 |
 | prettier | 3.8.3 |
 | svelte-check | 4.1.1 |
@@ -174,7 +175,16 @@ P1-T1 完了時点での lockfile 確定バージョン：
 
 ---
 
-## 6. CI 環境
+## 6. GitHub リポジトリ
+
+- リポジトリ: `https://github.com/matun02/dots-war-sim`
+- `gh` CLI (GitHub CLI) 2.92.0 をインストール済み（`winget install GitHub.cli`）
+- 認証: `gh auth login -h github.com -p https --web`（device code flow）
+- push に `.github/workflows/` を含む場合、OAuth トークンに `workflow` スコープが必要: `gh auth refresh -s workflow`
+
+---
+
+## 7. CI 環境
 
 `.github/workflows/ci.yml` は以下を使用：
 - Node.js: 22 (LTS)
@@ -185,7 +195,7 @@ P1-T1 完了時点での lockfile 確定バージョン：
 
 ---
 
-## 7. 補足: 推奨エディタ設定
+## 8. 補足: 推奨エディタ設定
 
 VS Code を使う場合の推奨拡張機能（任意）：
 - Svelte for VS Code (`svelte.svelte-vscode`)
@@ -197,8 +207,9 @@ VS Code を使う場合の推奨拡張機能（任意）：
 
 ---
 
-## 8. 変更履歴
+## 9. 変更履歴
 
 | 日付 | 変更 |
 |---|---|
 | 2026-05-19 | 初版（P1-T1 完了時の実録ベース） |
+| 2026-05-19 | §6 GitHub リポジトリ追加、`@vitest/coverage-v8` をバージョン一覧に追加 |

@@ -29,7 +29,7 @@
 - **Claude Code への指示文サンプル**: そのままコピペ可
 
 ### 0.3 マイルストーン
-- **M0**: スケルトン完成（P1-T1〜T3） — P1-T1 ✅ 完了 (commit `bcd442d`, 2026-05-19)
+- **M0**: スケルトン完成（P1-T1〜T3） — ✅ 全完了 (2026-05-19)
 - **M1**: ゲーム表示できる（P1-T4〜T7）
 - **M2**: AI と対戦できる（P1-T8〜T12）
 - **M3**: 公開済み（P1-T13〜T15）
@@ -92,7 +92,7 @@ pnpm workspaces で以下のスケルトンを作ってください。
 
 ---
 
-## P1-T2: 決定論 RNG 実装
+## P1-T2: 決定論 RNG 実装 ✅ 完了 (2026-05-19, commit `9d6f2d9`)
 
 - **目的**: ゲーム全体の決定論基盤を作る
 - **入力**: `DESIGN.md` 章 6
@@ -105,9 +105,11 @@ pnpm workspaces で以下のスケルトンを作ってください。
      - `int(10)` が [0, 9] の整数を返す
 - **成果物**: `rng.ts`, `rng.test.ts`
 - **受け入れ基準**:
-  - [ ] `pnpm --filter core test` が全 pass
-  - [ ] テストカバレッジ rng.ts 100%
+  - [x] `pnpm --filter core test` が全 pass
+  - [x] テストカバレッジ rng.ts 100%
 - **見積**: 半日
+- **実績**: 30 分
+- **学び**: DESIGN.md §6.1 の `(r as any).a` は `any` 禁止規約に抵触するため、`restore()` は `new Rng(s)` で代替（`>>> 0` は冪等なので同一動作）。esbuild が `-2 ** 31` をパースできないため `-(2 ** 31)` に括弧が必要。`@vitest/coverage-v8` は vitest と同バージョンを指定する必要がある。
 - **Claude Code への指示文サンプル**:
 
 ```text
@@ -135,7 +137,7 @@ DESIGN.md 章 6 のサンプル実装を参照。
 
 ---
 
-## P1-T3: ゲーム状態の型定義
+## P1-T3: ゲーム状態の型定義 ✅ 完了 (2026-05-19, commit `b1f7fb7`)
 
 - **目的**: 共有型を定める。実装前のスキーマ確定
 - **入力**: `DESIGN.md` 章 3
@@ -147,9 +149,11 @@ DESIGN.md 章 6 のサンプル実装を参照。
   5. `index.ts` から re-export
 - **成果物**: `types.ts`, `sim/index.ts`
 - **受け入れ基準**:
-  - [ ] typecheck pass
-  - [ ] `JSON.stringify(emptyGameState)` が正しく動く（簡単なテストで確認）
+  - [x] typecheck pass
+  - [x] `JSON.stringify(emptyGameState)` が正しく動く（簡単なテストで確認）
 - **見積**: 半日
+- **実績**: 15 分
+- **学び**: DESIGN.md では `MapDef.terrain` を `Uint8Array` としているが、`Uint8Array` は `JSON.stringify` で `{"0":0,"1":0,...}` になり非可搬。`number[]` に変更して JSON ラウンドトリップを保証した。`TERRAIN_INDEX` 定数を追加し terrain 列挙子と数値の対応を型安全に管理。
 - **Claude Code への指示文サンプル**:
 
 ```text
@@ -774,3 +778,4 @@ P1-T10: A* パスファインディングを実装します。
 |---|---|---|
 | 2026-05-19 | 1.0.0 | 初版作成 |
 | 2026-05-19 | 1.0.1 | P1-T1 完了マーク、`--filter` を `@war-of-dots/web` フルネームに統一、vitest `--passWithNoTests` の注記追加、SETUP.md 参照を指示文サンプルに追加 |
+| 2026-05-19 | 1.0.2 | P1-T2 完了マーク（commit `9d6f2d9`）、P1-T3 完了マーク（commit `b1f7fb7`）、M0 マイルストーン全完了 |

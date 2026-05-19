@@ -341,6 +341,7 @@ test(sim): add deterministic replay equivalence test
 |---|---|---|
 | 2026-05-19 | 1.0.0 | 初版作成 |
 | 2026-05-19 | 1.0.1 | P1-T1 完了。ディレクトリ構成に `@war-of-dots/*` スコープ・`.claude/` 配下を明記、§7.1 に SETUP.md 確認を追加、§10 に SETUP.md リンクを追加 |
+| 2026-05-19 | 1.0.2 | P1-T2 完了（決定論 RNG）、P1-T3 完了（型定義）。M0 マイルストーン達成。GitHub リポジトリ `matun02/dots-war-sim` を開設 |
 
 ---
 
