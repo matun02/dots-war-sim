@@ -8,6 +8,7 @@ TypeScript + Svelte 5 + PixiJS v8 + Cloudflare で構築。
 - [`.claude/CLAUDE.md`](./.claude/CLAUDE.md) — プロジェクト規約（最初に読む）
 - [`.claude/DESIGN.md`](./.claude/DESIGN.md) — 設計書
 - [`.claude/TASKS.md`](./.claude/TASKS.md) — 作業手順
+- [`.claude/SETUP.md`](./.claude/SETUP.md) — 環境セットアップ（Windows 実録 + トラブルシュート）
 
 ## 必要環境
 

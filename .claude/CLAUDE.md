@@ -72,7 +72,7 @@
 ```
 war-of-dots/
 ├── apps/
-│   ├── web/                 # Svelte 5 + Vite + PixiJS（クライアント）
+│   ├── web/                 # @war-of-dots/web — Svelte 5 + Vite + PixiJS（クライアント）
 │   │   ├── src/
 │   │   │   ├── ui/          # Svelte コンポーネント
 │   │   │   ├── game/
@@ -84,10 +84,10 @@ war-of-dots/
 │   │   │   ├── stores/      # Zustand (UI only)
 │   │   │   └── main.ts
 │   │   └── public/assets/
-│   └── server/              # Cloudflare Workers（Phase3 以降）
+│   └── server/              # @war-of-dots/server — Cloudflare Workers（Phase3 以降）
 │       └── src/
 ├── packages/
-│   ├── core/                # ★最重要：sim・型・共通ロジック
+│   ├── core/                # @war-of-dots/core — ★最重要：sim・型・共通ロジック
 │   │   ├── src/
 │   │   │   ├── sim/         # 純関数シミュレーション
 │   │   │   ├── pathfinding/
@@ -95,15 +95,22 @@ war-of-dots/
 │   │   │   ├── replay.ts
 │   │   │   └── types.ts
 │   │   └── package.json
-│   ├── maps/                # マップ JSON + バリデーション
-│   └── assets/              # 共通アセット定義
+│   ├── maps/                # @war-of-dots/maps — マップ JSON + バリデーション
+│   └── assets/              # @war-of-dots/assets — 共通アセット定義
 ├── tests/
 │   └── e2e/                 # Playwright
 ├── .github/workflows/
+├── .claude/                 # 規約・設計・作業手順・セットアップ
+│   ├── CLAUDE.md            # ← このファイル
+│   ├── DESIGN.md
+│   ├── TASKS.md
+│   └── SETUP.md             # 環境セットアップ実録
 ├── pnpm-workspace.yaml
-├── README.md
-└── CLAUDE.md                # ← このファイル
+└── README.md
 ```
+
+★MUST: 全パッケージは `@war-of-dots/<name>` スコープを使う。
+`pnpm --filter` 指定時は **`pnpm --filter @war-of-dots/web dev`** のようにフルネームを指定する（短縮の `web` は package.json の name と一致しないため動かない）。
 
 ### 3.1 依存方向（★MUST）
 
@@ -255,6 +262,7 @@ test(sim): add deterministic replay equivalence test
 2. **対象 Issue / タスク ID を確認**
 3. **影響範囲（ファイル）を洗い出して提示してから着手**
 4. **テストを先に書ける場合は TDD で進める**
+5. **環境未整備の場合は `SETUP.md` を確認**（Windows での PowerShell 実行ポリシー、pnpm インストール方法など）
 
 ### 7.2 ★MUST：作業中に守ること
 - 1 タスクで触るディレクトリは **2 つまで**（横断したい時は PR を分ける）
@@ -320,9 +328,10 @@ test(sim): add deterministic replay equivalence test
 
 - 設計詳細: `DESIGN.md`
 - 作業順手順: `TASKS.md`
+- 環境セットアップ: `SETUP.md`（Windows での実録手順とトラブルシュート）
 - 開発フロー: `CONTRIBUTING.md`（後で作成）
 - マップ仕様: `packages/maps/README.md`（後で作成）
-- ライセンス: `LICENSE`（MIT を想定）
+- ライセンス: `../LICENSE`（MIT）
 
 ---
 
@@ -331,6 +340,7 @@ test(sim): add deterministic replay equivalence test
 | 日付 | バージョン | 変更 |
 |---|---|---|
 | 2026-05-19 | 1.0.0 | 初版作成 |
+| 2026-05-19 | 1.0.1 | P1-T1 完了。ディレクトリ構成に `@war-of-dots/*` スコープ・`.claude/` 配下を明記、§7.1 に SETUP.md 確認を追加、§10 に SETUP.md リンクを追加 |
 
 ---
 

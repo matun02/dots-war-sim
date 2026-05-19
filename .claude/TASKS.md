@@ -29,7 +29,7 @@
 - **Claude Code への指示文サンプル**: そのままコピペ可
 
 ### 0.3 マイルストーン
-- **M0**: スケルトン完成（P1-T1〜T3）
+- **M0**: スケルトン完成（P1-T1〜T3） — P1-T1 ✅ 完了 (commit `bcd442d`, 2026-05-19)
 - **M1**: ゲーム表示できる（P1-T4〜T7）
 - **M2**: AI と対戦できる（P1-T8〜T12）
 - **M3**: 公開済み（P1-T13〜T15）
@@ -40,7 +40,7 @@
 
 # Phase 1: シングルプレイ MVP
 
-## P1-T1: リポジトリ初期化
+## P1-T1: リポジトリ初期化 ✅ 完了 (2026-05-19, commit `bcd442d`)
 
 - **目的**: pnpm workspace 構成のスケルトンを作る
 - **入力**: `CLAUDE.md` の章 3（ディレクトリ構成）
@@ -60,31 +60,33 @@
   - `.github/workflows/ci.yml`
   - ルート設定一式
 - **受け入れ基準**:
-  - [ ] `pnpm install` が成功
-  - [ ] `pnpm -r typecheck` が pass
-  - [ ] `pnpm -r test` が pass（空でも OK）
-  - [ ] `pnpm --filter web dev` で localhost で Svelte の "Hello" が見える
+  - [x] `pnpm install` が成功
+  - [x] `pnpm -r typecheck` が pass
+  - [x] `pnpm -r test` が pass（テスト 0 件のパッケージは `vitest run --passWithNoTests` を使う）
+  - [x] `pnpm --filter @war-of-dots/web dev` で localhost で "Hello War of Dots" が見える
 - **見積**: 半日
+- **実績**: 半日（環境セットアップ込み）
+- **学び**: `SETUP.md` §3 参照。corepack ではなく `npm install -g pnpm` 推奨（Windows 権限問題）、PowerShell 実行ポリシー設定が必須、`apps/web` の vitest は `--passWithNoTests` 必須。
 - **Claude Code への指示文サンプル**:
 
 ```text
-@CLAUDE.md @DESIGN.md を読みました。これに従って P1-T1 を実装します。
+@CLAUDE.md @DESIGN.md @SETUP.md を読みました。これに従って P1-T1 を実装します。
 
 pnpm workspaces で以下のスケルトンを作ってください。
 
 1. ルート: package.json, pnpm-workspace.yaml, tsconfig.base.json, .gitignore, README.md, LICENSE(MIT)
-2. apps/web: Vite + Svelte 5 + TypeScript（strict）、entry が "Hello War of Dots" を表示するだけ
-3. packages/core: TypeScript only ライブラリ、Vitest 設定済み、src/index.ts でダミー関数 export
+2. apps/web (= @war-of-dots/web): Vite + Svelte 5 + TypeScript（strict）、entry が "Hello War of Dots" を表示するだけ
+3. packages/core (= @war-of-dots/core): TypeScript only ライブラリ、Vitest 設定済み、src/index.ts でダミー関数 export
 4. ESLint flat config + Prettier をルートに
 5. GitHub Actions: ci.yml で pnpm install → typecheck → test
 
 完了基準:
 - pnpm install が成功
 - pnpm -r typecheck pass
-- pnpm -r test pass（空でも OK）
-- pnpm --filter web dev で表示できる
+- pnpm -r test pass（テスト 0 件のパッケージは vitest run --passWithNoTests）
+- pnpm --filter @war-of-dots/web dev で表示できる
 
-ファイルは ASCII / UTF-8、改行 LF。
+ファイルは UTF-8、改行 LF。
 着手前に変更予定ファイルの一覧を提示してください。
 ```
 
@@ -771,3 +773,4 @@ P1-T10: A* パスファインディングを実装します。
 | 日付 | バージョン | 変更 |
 |---|---|---|
 | 2026-05-19 | 1.0.0 | 初版作成 |
+| 2026-05-19 | 1.0.1 | P1-T1 完了マーク、`--filter` を `@war-of-dots/web` フルネームに統一、vitest `--passWithNoTests` の注記追加、SETUP.md 参照を指示文サンプルに追加 |
