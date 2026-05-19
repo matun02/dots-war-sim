@@ -16,3 +16,5 @@ export type {
 } from './types.js';
 
 export { TERRAIN_INDEX } from './types.js';
+
+export { tick } from './tick.js';
