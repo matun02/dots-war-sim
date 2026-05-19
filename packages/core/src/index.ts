@@ -1,0 +1,9 @@
+/**
+ * @war-of-dots/core
+ *
+ * Pure-TypeScript simulation, pathfinding, RNG, and shared types
+ * for the War of Dots clone. Must remain free of DOM / Node / framework
+ * dependencies (see CLAUDE.md §3.1, §4.3).
+ */
+
+export const VERSION = '0.0.0';

@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.vite/
+.turbo/
+
+# Cache
+.cache/
+.eslintcache
+*.tsbuildinfo
+
+# Coverage
+coverage/
+*.lcov
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+
+# Env
+.env
+.env.local
+.env.*.local
+*.local
+
+# Playwright / test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Misc
+.tmp/
