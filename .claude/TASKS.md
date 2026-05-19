@@ -180,7 +180,7 @@ packages/core/src/sim/types.test.ts で:
 
 ---
 
-## P1-T4: 純関数 tick の骨格
+## P1-T4: 純関数 tick の骨格 ✅ 完了 (2026-05-19, commit `7488397`)
 
 - **目的**: tick の orchestrator と空のステップ関数群
 - **入力**: `DESIGN.md` 章 5
@@ -195,9 +195,11 @@ packages/core/src/sim/types.test.ts で:
      - 同じ初期状態 + 同じ inputs で 1000tick 回すと **JSON.stringify が完全一致**
 - **成果物**: `tick.ts`, `steps/*.ts`, `tick.test.ts`
 - **受け入れ基準**:
-  - [ ] 決定論テスト pass
-  - [ ] 各ステップは空でも呼ばれていることをスパイで確認
+  - [x] 決定論テスト pass
+  - [x] 各ステップは空でも呼ばれていることをスパイで確認
 - **見積**: 1 日
+- **実績**: 30 分
+- **学び**: vitest の `vi.spyOn` は ESM namespace import に対しても正常に動作する（vitest がモジュールを書き換え可能にするため）。`structuredClone` による deep clone で immutability を保証。`resolveCombat` と `produceUnits` のみ `Rng` 引数を取る設計（将来乱数を使うステップ）。
 - **Claude Code への指示文サンプル**:
 
 ```text
@@ -779,3 +781,4 @@ P1-T10: A* パスファインディングを実装します。
 | 2026-05-19 | 1.0.0 | 初版作成 |
 | 2026-05-19 | 1.0.1 | P1-T1 完了マーク、`--filter` を `@war-of-dots/web` フルネームに統一、vitest `--passWithNoTests` の注記追加、SETUP.md 参照を指示文サンプルに追加 |
 | 2026-05-19 | 1.0.2 | P1-T2 完了マーク（commit `9d6f2d9`）、P1-T3 完了マーク（commit `b1f7fb7`）、M0 マイルストーン全完了 |
+| 2026-05-19 | 1.0.3 | P1-T4 完了マーク（commit `7488397`）。tick orchestrator + 8 空ステップ + テスト 5 件。M1 進行中 |
