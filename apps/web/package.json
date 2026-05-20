@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@war-of-dots/core": "workspace:*",
+    "pixi.js": "8",
     "svelte": "^5.16.0"
   },
   "devDependencies": {
