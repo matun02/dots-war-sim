@@ -198,26 +198,7 @@ export function tick(
 ### 5.1 ループ構造
 - **Simulation**: 固定 30 Hz（`TICK_DT = 1000/30 ms`）
 - **Render**: `requestAnimationFrame`（60 Hz 想定、補間あり）
-
-```ts
-// apps/web/src/game/loop.ts
-const TICK_DT = 1000 / 30;
-let acc = 0, last = performance.now();
-let prev = clone(state), cur = state;
-
-function frame(now: number) {
-  const dt = Math.min(now - last, 250); // スパイク対策
-  last = now;
-  acc += dt;
-  while (acc >= TICK_DT) {
-    prev = cur;
-    cur = tick(cur, collectInputs(), rng);
-    acc -= TICK_DT;
-  }
-  render(prev, cur, acc / TICK_DT);
-  requestAnimationFrame(frame);
-}
-```
+- 実装詳細は DESIGN.md §4.2 を参照
 
 ### 5.2 入力（Command）
 - 入力は **`InputFrame`** にバッチ化される
