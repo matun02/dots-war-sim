@@ -335,7 +335,7 @@ pnpm --filter web add pixi.js@8 を実行してから:
 
 ---
 
-## P1-T7: マップ JSON 定義と読み込み
+## P1-T7: マップ JSON 定義と読み込み ✅ 完了 (2026-05-20, commit `335a662`)
 
 - **目的**: 最初のテストマップを定義し、レンダリングで地形を表示
 - **入力**: `DESIGN.md` 章 1.3, 3
@@ -348,9 +348,11 @@ pnpm --filter web add pixi.js@8 を実行してから:
   6. `apps/web/src/game/render/terrain.ts` で地形タイルを色分け描画
 - **成果物**: `packages/maps/*`, `terrain.ts`
 - **受け入れ基準**:
-  - [ ] dev サーバでマップが見える（緑=平地、灰=山、青=水、深緑=森）
-  - [ ] スキーマ検証 pass
+  - [x] dev サーバでマップが見える（緑=平地、灰=山、青=水、深緑=森）
+  - [x] スキーマ検証 pass
 - **見積**: 1 日
+- **実績**: 30 分
+- **学び**: valibot v1 では `v.pipe()` でバリデーションチェーンを構築。JSON re-export は `export { default as name } from './data/file.json'` で可能（`resolveJsonModule: true` 前提）。PixiJS v8 の `Graphics.rect().fill()` で個別セルを塗る方式は 64x36 = 2304 セルでも問題なく動作。`svelte-check` はパッケージの内部パス（`@pkg/src/data/file.json`）を解決できないため、パッケージの公開 API 経由で re-export が必要。
 
 ```text
 P1-T7 を実装します。
@@ -789,3 +791,4 @@ P1-T10: A* パスファインディングを実装します。
 | 2026-05-20 | 1.0.4 | P1-T5 完了マーク（commit `12f1fab`）。ゲームループ（accumulator パターン + スパイク対策）+ テスト 6 件 + jsdom 環境設定 |
 | 2026-05-20 | 1.0.5 | Claude Code スキル 3 件追加（`skill-update-tasks.md`, `skill-update-claude.md`, `skill-doc-commit.md`） |
 | 2026-05-20 | 1.0.6 | P1-T6 完了マーク（commit `4b8f443`）。PixiJS v8 ステージ初期化 + グリッド描画 + リサイズ対応 |
+| 2026-05-20 | 1.0.7 | P1-T7 完了マーク（commit `335a662`）。maps パッケージ + valibot バリデーション + 地形・都市描画 + テスト 8 件。M1 進行中 |
