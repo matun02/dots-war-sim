@@ -785,3 +785,4 @@ P1-T10: A* パスファインディングを実装します。
 | 2026-05-19 | 1.0.2 | P1-T2 完了マーク（commit `9d6f2d9`）、P1-T3 完了マーク（commit `b1f7fb7`）、M0 マイルストーン全完了 |
 | 2026-05-19 | 1.0.3 | P1-T4 完了マーク（commit `7488397`）。tick orchestrator + 8 空ステップ + テスト 5 件。M1 進行中 |
 | 2026-05-20 | 1.0.4 | P1-T5 完了マーク（commit `12f1fab`）。ゲームループ（accumulator パターン + スパイク対策）+ テスト 6 件 + jsdom 環境設定 |
+| 2026-05-20 | 1.0.5 | Claude Code スキル 3 件追加（`skill-update-tasks.md`, `skill-update-claude.md`, `skill-doc-commit.md`） |
