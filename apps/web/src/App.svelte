@@ -1,14 +1,41 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import type { City, CityId, PlayerId } from '@war-of-dots/core';
+  import { loadMap, firstBloodJson } from '@war-of-dots/maps';
   import { createStage, destroyStage, type Application } from './game/render/stage';
+  import { drawTerrain } from './game/render/terrain';
   import { drawGrid } from './game/render/grid';
+  import { drawCities } from './game/render/cities';
 
   let canvasEl: HTMLCanvasElement;
   let app: Application | null = null;
 
   onMount(async () => {
     app = await createStage(canvasEl);
-    drawGrid(app, 64, 36, 20);
+
+    const map = loadMap(firstBloodJson);
+
+    const cities: City[] = map.cities.map((c) => ({
+      id: c.id,
+      pos: c.pos,
+      owner: null as PlayerId | null,
+      production: c.production,
+      produceCooldownTicks: 0,
+      captureProgressTicks: 0,
+      capturingPlayer: null,
+      supplyUsed: 0,
+    }));
+
+    for (const spawn of map.spawns) {
+      const city = cities.find((c) => c.id === (spawn.cityId as CityId));
+      if (city) {
+        city.owner = spawn.player;
+      }
+    }
+
+    drawTerrain(app, map, 20);
+    drawGrid(app, map.width, map.height, 20);
+    drawCities(app, cities, 20);
   });
 
   onDestroy(() => {
