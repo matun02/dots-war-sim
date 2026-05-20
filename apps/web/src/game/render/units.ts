@@ -5,7 +5,7 @@ import {
   Sprite,
   type Texture,
 } from 'pixi.js';
-import type { Unit } from '@war-of-dots/core';
+import type { EntityId, Unit } from '@war-of-dots/core';
 
 const PLAYER_COLORS: Record<number, number> = {
   0: 0x4488ff,
@@ -22,16 +22,17 @@ export function createUnitRenderer(
     prevUnits: readonly Unit[],
     curUnits: readonly Unit[],
     alpha: number,
+    selectedIds?: readonly EntityId[],
   ): void;
   container: Container;
 } {
   const container = new Container();
   const sprites: Sprite[] = [];
 
+  const radius = cellPx * 0.25;
   const textures = new Map<number, Texture>();
   for (const [playerId, color] of Object.entries(PLAYER_COLORS)) {
     const g = new Graphics();
-    const radius = cellPx * 0.25;
     g.circle(0, 0, radius);
     g.fill(color);
     const tex = app.renderer.generateTexture({
@@ -41,6 +42,9 @@ export function createUnitRenderer(
     textures.set(Number(playerId), tex);
     g.destroy();
   }
+
+  const selectionRings = new Graphics();
+  container.addChild(selectionRings);
 
   function getOrCreateSprite(index: number): Sprite {
     while (sprites.length <= index) {
@@ -58,7 +62,13 @@ export function createUnitRenderer(
 
   return {
     container,
-    update(prevUnits, curUnits, alpha) {
+    update(prevUnits, curUnits, alpha, selectedIds) {
+      const selectedSet = selectedIds
+        ? new Set<number>(selectedIds)
+        : undefined;
+
+      selectionRings.clear();
+
       for (let i = 0; i < curUnits.length; i++) {
         const cur = curUnits[i]!;
         const sprite = getOrCreateSprite(i);
@@ -68,12 +78,21 @@ export function createUnitRenderer(
         sprite.tint = PLAYER_COLORS[cur.owner] ?? FALLBACK_COLOR;
 
         const prev = prevUnits.find((u) => u.id === cur.id);
+        let sx: number;
+        let sy: number;
         if (prev) {
-          sprite.x = lerp(prev.pos.x, cur.pos.x, alpha) * cellPx;
-          sprite.y = lerp(prev.pos.y, cur.pos.y, alpha) * cellPx;
+          sx = lerp(prev.pos.x, cur.pos.x, alpha) * cellPx;
+          sy = lerp(prev.pos.y, cur.pos.y, alpha) * cellPx;
         } else {
-          sprite.x = cur.pos.x * cellPx;
-          sprite.y = cur.pos.y * cellPx;
+          sx = cur.pos.x * cellPx;
+          sy = cur.pos.y * cellPx;
+        }
+        sprite.x = sx;
+        sprite.y = sy;
+
+        if (selectedSet?.has(cur.id)) {
+          selectionRings.circle(sx, sy, radius + 2);
+          selectionRings.stroke({ color: 0xffffff, alpha: 0.8, width: 1.5 });
         }
       }
 

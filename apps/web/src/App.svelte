@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import {
+    type InputFrame,
     type Player,
     type PlayerId,
     Rng,
@@ -13,11 +14,15 @@
   import { drawGrid } from './game/render/grid';
   import { drawCities } from './game/render/cities';
   import { createUnitRenderer } from './game/render/units';
+  import { createSelectionRenderer } from './game/render/selection-box';
   import { createLoop, type LoopHandle } from './game/loop';
+  import { createInputCollector } from './game/input/commands';
+  import { unitsInRect, type SelectionBox } from './game/input/selection';
 
   let canvasEl: HTMLCanvasElement;
   let app: Application | null = null;
   let loop: LoopHandle | null = null;
+  let cleanupInput: (() => void) | null = null;
 
   onMount(async () => {
     app = await createStage(canvasEl);
@@ -39,25 +44,95 @@
     const unitRenderer = createUnitRenderer(app, cellPx);
     app.stage.addChild(unitRenderer.container);
 
+    const selectionRenderer = createSelectionRenderer(app, cellPx);
+    app.stage.addChild(selectionRenderer.container);
+
+    const inputCollector = createInputCollector(0 as PlayerId);
+
+    let dragging = false;
+    let selectionBox: SelectionBox | null = null;
+
+    const canvas = canvasEl;
+
+    function onMouseDown(e: MouseEvent): void {
+      if (e.button !== 0) return;
+      dragging = true;
+      const wx = e.offsetX / cellPx;
+      const wy = e.offsetY / cellPx;
+      selectionBox = {
+        startWorld: { x: wx, y: wy },
+        endWorld: { x: wx, y: wy },
+      };
+    }
+
+    function onMouseMove(e: MouseEvent): void {
+      if (!dragging || !selectionBox) return;
+      selectionBox.endWorld = {
+        x: e.offsetX / cellPx,
+        y: e.offsetY / cellPx,
+      };
+      selectionRenderer.show(selectionBox.startWorld, selectionBox.endWorld);
+    }
+
+    function onMouseUp(e: MouseEvent): void {
+      if (e.button !== 0 || !dragging || !selectionBox) return;
+      dragging = false;
+      selectionBox.endWorld = {
+        x: e.offsetX / cellPx,
+        y: e.offsetY / cellPx,
+      };
+
+      const ids = unitsInRect(
+        cur.units,
+        0,
+        selectionBox.startWorld,
+        selectionBox.endWorld,
+      );
+      inputCollector.select(ids);
+
+      selectionBox = null;
+      selectionRenderer.hide();
+    }
+
+    function onContextMenu(e: MouseEvent): void {
+      e.preventDefault();
+      const wx = e.offsetX / cellPx;
+      const wy = e.offsetY / cellPx;
+      inputCollector.moveCommand({ x: wx, y: wy });
+    }
+
+    canvas.addEventListener('mousedown', onMouseDown);
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseup', onMouseUp);
+    canvas.addEventListener('contextmenu', onContextMenu);
+
+    cleanupInput = () => {
+      canvas.removeEventListener('mousedown', onMouseDown);
+      canvas.removeEventListener('mousemove', onMouseMove);
+      canvas.removeEventListener('mouseup', onMouseUp);
+      canvas.removeEventListener('contextmenu', onContextMenu);
+    };
+
     loop = createLoop({
       tickRateHz: 30,
       onTick: () => {
         prev = cur;
-        for (const unit of cur.units) {
-          if (unit.goal === null) {
-            unit.goal = { x: 32, y: 18 };
-          }
-        }
-        cur = tick(prev, [], rng);
+        const commands = inputCollector.flush();
+        const frame: InputFrame = { tick: cur.tick, commands };
+        cur = tick(prev, [frame], rng);
       },
       onRender: (alpha) => {
-        unitRenderer.update(prev.units, cur.units, alpha);
+        unitRenderer.update(prev.units, cur.units, alpha, inputCollector.selectedIds);
       },
     });
     loop.start();
   });
 
   onDestroy(() => {
+    if (cleanupInput) {
+      cleanupInput();
+      cleanupInput = null;
+    }
     if (loop) {
       loop.stop();
       loop = null;
