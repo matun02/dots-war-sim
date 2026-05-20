@@ -18,3 +18,5 @@ export type {
 export { TERRAIN_INDEX } from './types.js';
 
 export { tick } from './tick.js';
+export { createInitialState } from './init.js';
+export { TICK_RATE, SUPPLY_MAX, UNIT_STATS } from './constants.js';

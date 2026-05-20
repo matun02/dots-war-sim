@@ -1,44 +1,67 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import type { City, CityId, PlayerId } from '@war-of-dots/core';
+  import {
+    type Player,
+    type PlayerId,
+    Rng,
+    createInitialState,
+    tick,
+  } from '@war-of-dots/core';
   import { loadMap, firstBloodJson } from '@war-of-dots/maps';
   import { createStage, destroyStage, type Application } from './game/render/stage';
   import { drawTerrain } from './game/render/terrain';
   import { drawGrid } from './game/render/grid';
   import { drawCities } from './game/render/cities';
+  import { createUnitRenderer } from './game/render/units';
+  import { createLoop, type LoopHandle } from './game/loop';
 
   let canvasEl: HTMLCanvasElement;
   let app: Application | null = null;
+  let loop: LoopHandle | null = null;
 
   onMount(async () => {
     app = await createStage(canvasEl);
-
     const map = loadMap(firstBloodJson);
 
-    const cities: City[] = map.cities.map((c) => ({
-      id: c.id,
-      pos: c.pos,
-      owner: null as PlayerId | null,
-      production: c.production,
-      produceCooldownTicks: 0,
-      captureProgressTicks: 0,
-      capturingPlayer: null,
-      supplyUsed: 0,
-    }));
+    const players: Player[] = [
+      { id: 0 as PlayerId, name: 'Player 1', color: 0x4488ff, alive: true },
+      { id: 1 as PlayerId, name: 'Player 2', color: 0xff8844, alive: true },
+    ];
+    let prev = createInitialState(map, players, 42);
+    let cur = structuredClone(prev);
+    const rng = new Rng(42);
 
-    for (const spawn of map.spawns) {
-      const city = cities.find((c) => c.id === (spawn.cityId as CityId));
-      if (city) {
-        city.owner = spawn.player;
-      }
-    }
+    const cellPx = 20;
+    drawTerrain(app, map, cellPx);
+    drawGrid(app, map.width, map.height, cellPx);
+    drawCities(app, cur.cities, cellPx);
 
-    drawTerrain(app, map, 20);
-    drawGrid(app, map.width, map.height, 20);
-    drawCities(app, cities, 20);
+    const unitRenderer = createUnitRenderer(app, cellPx);
+    app.stage.addChild(unitRenderer.container);
+
+    loop = createLoop({
+      tickRateHz: 30,
+      onTick: () => {
+        prev = cur;
+        for (const unit of cur.units) {
+          if (unit.goal === null) {
+            unit.goal = { x: 32, y: 18 };
+          }
+        }
+        cur = tick(prev, [], rng);
+      },
+      onRender: (alpha) => {
+        unitRenderer.update(prev.units, cur.units, alpha);
+      },
+    });
+    loop.start();
   });
 
   onDestroy(() => {
+    if (loop) {
+      loop.stop();
+      loop = null;
+    }
     if (app) {
       destroyStage(app);
       app = null;
