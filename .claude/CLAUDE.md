@@ -343,6 +343,7 @@ test(sim): add deterministic replay equivalence test
 | 2026-05-19 | 1.0.1 | P1-T1 完了。ディレクトリ構成に `@war-of-dots/*` スコープ・`.claude/` 配下を明記、§7.1 に SETUP.md 確認を追加、§10 に SETUP.md リンクを追加 |
 | 2026-05-19 | 1.0.2 | P1-T2 完了（決定論 RNG）、P1-T3 完了（型定義）。M0 マイルストーン達成。GitHub リポジトリ `matun02/dots-war-sim` を開設 |
 | 2026-05-19 | 1.0.3 | P1-T4 完了（tick orchestrator + 8 空ステップ関数）。`packages/core/src/sim/tick.ts` + `steps/` 配下 8 ファイル + テスト 5 件。決定論テスト・spy テスト・immutability テスト全 pass |
+| 2026-05-20 | 1.0.4 | P1-T5 完了（ゲームループ）。`apps/web/src/game/loop.ts` — accumulator パターン + スパイク対策 + jsdom テスト環境。テスト 6 件全 pass |
 
 ---
 

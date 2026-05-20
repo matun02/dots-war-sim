@@ -237,7 +237,7 @@ function tick(state: GameState, inputs: readonly InputFrame[], rng: Rng): GameSt
 
 ---
 
-## P1-T5: ゲームループ（クライアント側）
+## P1-T5: ゲームループ（クライアント側） ✅ 完了 (2026-05-20, commit `12f1fab`)
 
 - **目的**: 30Hz tick + RAF render の骨格
 - **入力**: `DESIGN.md` 章 4
@@ -250,9 +250,11 @@ function tick(state: GameState, inputs: readonly InputFrame[], rng: Rng): GameSt
   6. テスト: 仮想時間で 1 秒分回したら tick が 30 回呼ばれること（vitest の fake timers）
 - **成果物**: `loop.ts`, `loop.test.ts`
 - **受け入れ基準**:
-  - [ ] 単体テスト pass
-  - [ ] 100ms 経過で 3 回 tick が呼ばれる（fake timer で検証）
+  - [x] 単体テスト pass
+  - [x] 100ms 経過で 3 回 tick が呼ばれる（fake timer で検証）
 - **見積**: 半日
+- **実績**: 30 分
+- **学び**: vitest の fake timers の `requestAnimationFrame` は 16ms 間隔で発火するため、テストでは手動 RAF モックで正確なタイムスタンプ制御が必要。IEEE 754 浮動小数点の tick 境界誤差（`100 - 2*(1000/30) < 1000/30`）は accumulator に 1e-6 epsilon ガードで対処。jsdom を `apps/web` の devDependency に追加し `vite.config.ts` で `test.environment: 'jsdom'` を設定。
 
 ```text
 P1-T5 を実装します。
@@ -782,3 +784,4 @@ P1-T10: A* パスファインディングを実装します。
 | 2026-05-19 | 1.0.1 | P1-T1 完了マーク、`--filter` を `@war-of-dots/web` フルネームに統一、vitest `--passWithNoTests` の注記追加、SETUP.md 参照を指示文サンプルに追加 |
 | 2026-05-19 | 1.0.2 | P1-T2 完了マーク（commit `9d6f2d9`）、P1-T3 完了マーク（commit `b1f7fb7`）、M0 マイルストーン全完了 |
 | 2026-05-19 | 1.0.3 | P1-T4 完了マーク（commit `7488397`）。tick orchestrator + 8 空ステップ + テスト 5 件。M1 進行中 |
+| 2026-05-20 | 1.0.4 | P1-T5 完了マーク（commit `12f1fab`）。ゲームループ（accumulator パターン + スパイク対策）+ テスト 6 件 + jsdom 環境設定 |
