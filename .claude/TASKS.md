@@ -290,7 +290,7 @@ JSDOM 環境（vitest 設定）が必要なら設定追加して。
 
 ---
 
-## P1-T6: PixiJS ステージ初期化と描画
+## P1-T6: PixiJS ステージ初期化と描画 ✅ 完了 (2026-05-20, commit `4b8f443`)
 
 - **目的**: 画面に Pixi の Canvas + 背景 + グリッドを描く
 - **入力**: なし（独立）
@@ -302,9 +302,11 @@ JSDOM 環境（vitest 設定）が必要なら設定追加して。
   5. リサイズ対応（autoDensity, resolution: window.devicePixelRatio）
 - **成果物**: `stage.ts`, `grid.ts`, `App.svelte` 更新
 - **受け入れ基準**:
-  - [ ] `pnpm --filter web dev` で起動し、暗背景 + 薄いグリッドが見える
-  - [ ] ウィンドウリサイズで追従する
+  - [x] `pnpm --filter web dev` で起動し、暗背景 + 薄いグリッドが見える
+  - [x] ウィンドウリサイズで追従する
 - **見積**: 半日
+- **実績**: 20 分
+- **学び**: PixiJS v8 では `new Application()` 後に `await app.init(options)` を呼ぶ（v7 とは異なる非同期初期化）。Graphics API も v8 で変更あり: `setStrokeStyle()` + `moveTo/lineTo` + `stroke()` のチェーン。CLAUDE.md §4.5 の Pixi import 制約は `type` re-export（`export type { Application } from 'pixi.js'`）で render/ 外にも型だけ公開可能。
 
 ```text
 P1-T6 を実装します。
@@ -786,3 +788,4 @@ P1-T10: A* パスファインディングを実装します。
 | 2026-05-19 | 1.0.3 | P1-T4 完了マーク（commit `7488397`）。tick orchestrator + 8 空ステップ + テスト 5 件。M1 進行中 |
 | 2026-05-20 | 1.0.4 | P1-T5 完了マーク（commit `12f1fab`）。ゲームループ（accumulator パターン + スパイク対策）+ テスト 6 件 + jsdom 環境設定 |
 | 2026-05-20 | 1.0.5 | Claude Code スキル 3 件追加（`skill-update-tasks.md`, `skill-update-claude.md`, `skill-doc-commit.md`） |
+| 2026-05-20 | 1.0.6 | P1-T6 完了マーク（commit `4b8f443`）。PixiJS v8 ステージ初期化 + グリッド描画 + リサイズ対応 |

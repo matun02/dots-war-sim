@@ -345,6 +345,7 @@ test(sim): add deterministic replay equivalence test
 | 2026-05-19 | 1.0.3 | P1-T4 完了（tick orchestrator + 8 空ステップ関数）。`packages/core/src/sim/tick.ts` + `steps/` 配下 8 ファイル + テスト 5 件。決定論テスト・spy テスト・immutability テスト全 pass |
 | 2026-05-20 | 1.0.4 | P1-T5 完了（ゲームループ）。`apps/web/src/game/loop.ts` — accumulator パターン + スパイク対策 + jsdom テスト環境。テスト 6 件全 pass |
 | 2026-05-20 | 1.0.5 | Claude Code スキル追加。`.claude/skills/` に TASKS.md 更新・CLAUDE.md 更新・ドキュメント commit/push の 3 スキル |
+| 2026-05-20 | 1.0.6 | P1-T6 完了（PixiJS ステージ + グリッド）。`apps/web/src/game/render/stage.ts` + `grid.ts` — PixiJS v8 非同期初期化・64×36 グリッド描画・リサイズ対応 |
 
 ---
 
