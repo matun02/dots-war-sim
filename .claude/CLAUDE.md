@@ -263,6 +263,7 @@ test(sim): add deterministic replay equivalence test
 3. **影響範囲（ファイル）を洗い出して提示してから着手**
 4. **テストを先に書ける場合は TDD で進める**
 5. **環境未整備の場合は `SETUP.md` を確認**（Windows での PowerShell 実行ポリシー、pnpm インストール方法など）
+6. Phase 2以降の作業に移る際は**入力**、**作業内容**、**成果物**、**受け入れ基準**、**見積**のPhase 2以降の記載がないため、Tasks含む関連ファイル更新を促すこと
 
 ### 7.2 ★MUST：作業中に守ること
 - 1 タスクで触るディレクトリは **2 つまで**（横断したい時は PR を分ける）
@@ -347,6 +348,7 @@ test(sim): add deterministic replay equivalence test
 | 2026-05-20 | 1.0.5 | Claude Code スキル追加。`.claude/skills/` に TASKS.md 更新・CLAUDE.md 更新・ドキュメント commit/push の 3 スキル |
 | 2026-05-20 | 1.0.6 | P1-T6 完了（PixiJS ステージ + グリッド）。`apps/web/src/game/render/stage.ts` + `grid.ts` — PixiJS v8 非同期初期化・64×36 グリッド描画・リサイズ対応 |
 | 2026-05-20 | 1.0.7 | P1-T7 完了（マップ JSON + 地形描画）。`packages/maps/` — valibot スキーマ + loadMap バリデーション + first-blood.json（64×36, 5都市, 山脈）。`terrain.ts` + `cities.ts` で地形・都市描画 |
+| 2026-05-20 | 1.0.8 | P1-T8 完了（ユニット生産 + 直線移動）。`constants.ts` + `init.ts` + `produce-units.ts` + `move-units.ts` + `units.ts` レンダラー。ゲームループ統合。テスト 17 件追加（合計 53 件） |
 
 ---
 
