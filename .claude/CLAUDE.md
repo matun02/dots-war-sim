@@ -331,6 +331,7 @@ test(sim): add deterministic replay equivalence test
 | 2026-05-20 | 1.0.7 | P1-T7 完了（マップ JSON + 地形描画）。`packages/maps/` — valibot スキーマ + loadMap バリデーション + first-blood.json（64×36, 5都市, 山脈）。`terrain.ts` + `cities.ts` で地形・都市描画 |
 | 2026-05-20 | 1.0.8 | P1-T8 完了（ユニット生産 + 直線移動）。`constants.ts` + `init.ts` + `produce-units.ts` + `move-units.ts` + `units.ts` レンダラー。ゲームループ統合。テスト 17 件追加（合計 53 件） |
 | 2026-05-20 | 1.0.9 | P1-T9 完了（矩形選択 + 移動命令）。`apply-inputs.ts` + `input/selection.ts` + `input/commands.ts` + `selection-box.ts`。units.ts に選択リング追加。テスト 9 件追加（合計 62 件） |
+| 2026-05-21 | 1.0.10 | P1-T10 完了（A* パスファインディング）。`pathfinding/binary-heap.ts` + `astar.ts` — 8方向・整数コスト・オクタイルh・決定論tie-break。`recompute-paths.ts` — 上限8件/tick。`move-units.ts` — path追従版+直線フォールバック。テスト 18 件追加（合計 80 件） |
 
 ---
 
