@@ -12,7 +12,7 @@
   import { createStage, destroyStage, type Application } from './game/render/stage';
   import { drawTerrain } from './game/render/terrain';
   import { drawGrid } from './game/render/grid';
-  import { drawCities } from './game/render/cities';
+  import { createCityRenderer } from './game/render/cities';
   import { createUnitRenderer } from './game/render/units';
   import { createSelectionRenderer } from './game/render/selection-box';
   import { createLoop, type LoopHandle } from './game/loop';
@@ -39,7 +39,8 @@
     const cellPx = 20;
     drawTerrain(app, map, cellPx);
     drawGrid(app, map.width, map.height, cellPx);
-    drawCities(app, cur.cities, cellPx);
+    const cityRenderer = createCityRenderer(app, cellPx);
+    cityRenderer.update(cur.cities);
 
     const unitRenderer = createUnitRenderer(app, cellPx);
     app.stage.addChild(unitRenderer.container);
@@ -122,6 +123,7 @@
         cur = tick(prev, [frame], rng);
       },
       onRender: (alpha) => {
+        cityRenderer.update(cur.cities);
         unitRenderer.update(prev.units, cur.units, alpha, inputCollector.selectedIds);
       },
     });
