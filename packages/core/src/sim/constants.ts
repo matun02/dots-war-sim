@@ -1,6 +1,11 @@
 export const TICK_RATE = 30;
 export const SUPPLY_MAX = 5;
 
+export const ATTACK_RANGE = 1.5;
+export const CAPTURE_NEUTRALIZE_TICKS = 60;
+export const CAPTURE_CLAIM_TICKS = 30;
+export const POST_CAPTURE_COOLDOWN_TICKS = 150;
+
 export const UNIT_STATS = {
   light: {
     speed: 4,
