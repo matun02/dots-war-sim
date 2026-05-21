@@ -30,21 +30,18 @@ describe('findPath (A*)', () => {
     expect(path![path!.length - 1]).toEqual({ x: 5, y: 0 });
   });
 
-  it('detours around mountains', () => {
+  it('detours around impassable water wall', () => {
     const blocked: [number, number, number][] = [];
     for (let y = 0; y < 9; y++) {
-      blocked.push([5, y, 1]);
+      blocked.push([5, y, 3]);
     }
     const map = makeMap(10, 10, blocked);
     const path = findPath(map, { x: 3, y: 4 }, { x: 7, y: 4 }, 'light');
     expect(path).not.toBeNull();
 
     for (const p of path!) {
-      if (p.x === 5 && p.y >= 0 && p.y < 9) {
-        expect(
-          map.terrain[p.y * map.width + p.x] !== 1 || path!.length > 2,
-        ).toBe(true);
-      }
+      const t = map.terrain[p.y * map.width + p.x];
+      expect(t).not.toBe(3);
     }
     expect(path![path!.length - 1]).toEqual({ x: 7, y: 4 });
   });
