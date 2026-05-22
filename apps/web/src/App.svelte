@@ -71,14 +71,20 @@
   }
 
   async function startGame(): Promise<void> {
-    cleanupGame();
+    stopLoop();
+    gameResult = null;
+    replayPaused = false;
     screen = 'game';
 
     await new Promise<void>((r) => {
       requestAnimationFrame(() => r());
     });
 
-    app = await createStage(canvasEl);
+    if (app) {
+      app.stage.removeChildren();
+    } else {
+      app = await createStage(canvasEl);
+    }
     const map = loadMap(firstBloodJson);
 
     const gamePlayers = players.map((p) => ({ ...p, alive: true }));
