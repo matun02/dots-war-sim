@@ -13,6 +13,7 @@
   "dependencies": {
     "@war-of-dots/core": "workspace:*",
     "@war-of-dots/maps": "workspace:^",
+    "idb-keyval": "^6.2.4",
     "pixi.js": "8",
     "svelte": "^5.16.0"
   },

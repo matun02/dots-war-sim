@@ -10,3 +10,5 @@ export const VERSION = '0.0.0';
 export { Rng } from './rng.js';
 export * from './sim/index.js';
 export { findPath, BinaryHeap } from './pathfinding/index.js';
+export { REPLAY_VERSION } from './replay.js';
+export type { Replay, ReplayPlayer } from './replay.js';

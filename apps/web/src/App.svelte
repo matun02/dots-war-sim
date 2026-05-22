@@ -5,6 +5,8 @@
     type GameResult,
     type Player,
     type PlayerId,
+    type Replay,
+    REPLAY_VERSION,
     Rng,
     createInitialState,
     tick,
@@ -20,10 +22,13 @@
   import { createInputCollector } from './game/input/commands';
   import { unitsInRect, type SelectionBox } from './game/input/selection';
   import { createAIController } from './game/ai/controller';
+  import { createReplayRecorder } from './game/replay/recorder';
+  import { createReplayPlayer, type ReplayPlayer } from './game/replay/player';
+  import { saveReplay } from './game/replay/storage';
   import Title from './ui/Title.svelte';
   import ResultDialog from './ui/ResultDialog.svelte';
 
-  type Screen = 'title' | 'game' | 'result';
+  type Screen = 'title' | 'game' | 'result' | 'replay';
 
   let screen: Screen = $state('title');
   let canvasEl: HTMLCanvasElement;
@@ -31,6 +36,8 @@
   let loop: LoopHandle | null = null;
   let cleanupInput: (() => void) | null = null;
   let gameResult: GameResult | null = $state(null);
+  let lastReplay: Replay | null = null;
+  let replayPaused = $state(false);
 
   const players: Player[] = [
     { id: 0 as PlayerId, name: 'Player 1', color: 0x4488ff, alive: true },
@@ -56,6 +63,7 @@
       app = null;
     }
     gameResult = null;
+    replayPaused = false;
   }
 
   async function startGame(): Promise<void> {
@@ -75,6 +83,7 @@
     const rng = new Rng(42);
     const aiRng = new Rng(123);
     const aiController = createAIController(1 as PlayerId, 'normal', aiRng);
+    const recorder = createReplayRecorder();
 
     const cellPx = 20;
     drawTerrain(app, map, cellPx);
@@ -164,6 +173,7 @@
           tick: cur.tick,
           commands: [...humanCommands, ...aiCommands],
         };
+        recorder.record(frame);
         cur = tick(prev, [frame], rng);
       },
       onRender: (alpha) => {
@@ -172,6 +182,21 @@
 
         if (cur.result !== null && screen === 'game') {
           gameResult = cur.result;
+          const replay: Replay = {
+            version: REPLAY_VERSION,
+            seed: 42,
+            mapId: map.id,
+            players: [
+              { id: 0 as PlayerId, name: 'Player 1', type: 'human' },
+              { id: 1 as PlayerId, name: 'Player 2', type: 'ai' },
+            ],
+            inputs: recorder.getFrames(),
+            finalTick: cur.tick,
+            result: cur.result,
+            createdAt: Date.now(),
+          };
+          lastReplay = replay;
+          saveReplay(replay);
           screen = 'result';
         }
       },
@@ -179,13 +204,76 @@
     loop.start();
   }
 
+  async function startReplay(): Promise<void> {
+    if (!lastReplay) return;
+    cleanupGame();
+    screen = 'replay';
+
+    await new Promise<void>((r) => {
+      requestAnimationFrame(() => r());
+    });
+
+    app = await createStage(canvasEl);
+    const map = loadMap(firstBloodJson);
+
+    const cellPx = 20;
+    drawTerrain(app, map, cellPx);
+    drawGrid(app, map.width, map.height, cellPx);
+    const cityRenderer = createCityRenderer(app, cellPx);
+    const unitRenderer = createUnitRenderer(app, cellPx);
+    app.stage.addChild(unitRenderer.container);
+
+    const rp: ReplayPlayer = createReplayPlayer(lastReplay);
+    let prevState = rp.state();
+    let curState = rp.state();
+    const savedResult = lastReplay.result;
+
+    cityRenderer.update(curState.cities);
+
+    loop = createLoop({
+      tickRateHz: 30,
+      onTick: () => {
+        prevState = curState;
+        const advanced = rp.step();
+        curState = rp.state();
+        if (!advanced && screen === 'replay') {
+          gameResult = savedResult;
+          screen = 'result';
+          lastReplay = null;
+        }
+      },
+      onRender: (alpha) => {
+        cityRenderer.update(curState.cities);
+        unitRenderer.update(prevState.units, curState.units, alpha, []);
+      },
+    });
+    loop.start();
+  }
+
+  function toggleReplayPause(): void {
+    if (!loop) return;
+    if (replayPaused) {
+      loop.resume();
+      replayPaused = false;
+    } else {
+      loop.pause();
+      replayPaused = true;
+    }
+  }
+
   function handleRematch(): void {
+    lastReplay = null;
     startGame();
   }
 
   function handleTitle(): void {
     cleanupGame();
+    lastReplay = null;
     screen = 'title';
+  }
+
+  function handleReplay(): void {
+    startReplay();
   }
 
   onDestroy(() => {
@@ -197,8 +285,17 @@
   <Title onstart={startGame} />
 {/if}
 
-{#if screen === 'game' || screen === 'result'}
+{#if screen === 'game' || screen === 'result' || screen === 'replay'}
   <canvas bind:this={canvasEl}></canvas>
+{/if}
+
+{#if screen === 'replay'}
+  <div class="replay-controls">
+    <span class="replay-label">REPLAY</span>
+    <button class="replay-btn" onclick={toggleReplayPause}>
+      {replayPaused ? 'Resume' : 'Pause'}
+    </button>
+  </div>
 {/if}
 
 {#if screen === 'result' && gameResult}
@@ -207,6 +304,7 @@
     {playerColors}
     onrematch={handleRematch}
     ontitle={handleTitle}
+    onreplay={lastReplay ? handleReplay : undefined}
   />
 {/if}
 
@@ -222,5 +320,42 @@
     display: block;
     width: 100vw;
     height: 100vh;
+  }
+
+  .replay-controls {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 6px 16px;
+    border-radius: 8px;
+    z-index: 50;
+  }
+
+  .replay-label {
+    color: #44aa66;
+    font-family: system-ui, sans-serif;
+    font-weight: bold;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+  }
+
+  .replay-btn {
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: 4px;
+    background: #555;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .replay-btn:hover {
+    background: #666;
   }
 </style>

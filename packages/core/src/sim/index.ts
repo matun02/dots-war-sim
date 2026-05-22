@@ -29,3 +29,4 @@ export {
   POST_CAPTURE_COOLDOWN_TICKS,
 } from './constants.js';
 export { SpatialHash } from './spatial-hash.js';
+export { hashState } from './hash.js';

@@ -6,9 +6,11 @@
     playerColors: Record<number, number>;
     onrematch: () => void;
     ontitle: () => void;
+    onreplay?: () => void;
   }
 
-  const { result, playerColors, onrematch, ontitle }: Props = $props();
+  const { result, playerColors, onrematch, ontitle, onreplay }: Props =
+    $props();
 
   const heading = $derived.by(() => {
     if (result.type === 'draw') return 'Draw!';
@@ -43,6 +45,9 @@
     {/if}
     <div class="buttons">
       <button class="btn" onclick={onrematch}>Rematch</button>
+      {#if onreplay}
+        <button class="btn btn-replay" onclick={onreplay}>Watch Replay</button>
+      {/if}
       <button class="btn btn-secondary" onclick={ontitle}>Title</button>
     </div>
   </div>
@@ -94,6 +99,14 @@
 
   .btn:hover {
     background: #5599ff;
+  }
+
+  .btn-replay {
+    background: #44aa66;
+  }
+
+  .btn-replay:hover {
+    background: #55bb77;
   }
 
   .btn-secondary {
