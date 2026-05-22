@@ -41,7 +41,30 @@
 
 ---
 
-## ★次タスク: P1-T15: Cloudflare Pages デプロイ
+## ★次タスク: P1-T14.5: パッケージスコープ名リネーム (`@war-of-dots` → `@dots-war-sim`)
+
+- **目的**: 著作権侵害リスクの回避。既存ゲーム「War of Dots」との混同を防ぐため、GitHub リポジトリ名 `dots-war-sim` に統一する
+- **入力**: 全ファイルの `@war-of-dots` / `war-of-dots` 参照箇所
+- **作業内容**:
+  1. 影響範囲の洗い出し（`grep -r` で全ファイル調査）
+  2. `package.json` の `name` フィールド置換（全パッケージ）
+  3. `import` パス置換（ソースコード + テスト）
+  4. `pnpm --filter` 等のドキュメント内参照置換（`.claude/` 配下含む）
+  5. `pnpm install` で lockfile 再生成
+  6. typecheck / test / lint 全 green 確認
+- **成果物**: 全パッケージが `@dots-war-sim/*` スコープに統一
+- **受け入れ基準**:
+  - [ ] `grep -r "war-of-dots"` がソース・設定から 0 件（changelog/アーカイブの履歴記述は除く）
+  - [ ] `pnpm install` 成功
+  - [ ] `pnpm -r typecheck` 通る
+  - [ ] `pnpm -r test` 通る（全 132 件 green）
+  - [ ] `pnpm lint` 通る
+  - [ ] `pnpm --filter @dots-war-sim/web dev` でゲームが動作する
+- **見積**: 1〜2 時間
+
+---
+
+## P1-T15: Cloudflare Pages デプロイ
 
 - **目的**: ゲームを公開する
 - **入力**: `DESIGN.md` デプロイ関連セクション
