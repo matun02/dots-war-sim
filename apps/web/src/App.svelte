@@ -19,6 +19,7 @@
   import { createLoop, type LoopHandle } from './game/loop';
   import { createInputCollector } from './game/input/commands';
   import { unitsInRect, type SelectionBox } from './game/input/selection';
+  import { createAIController } from './game/ai/controller';
   import Title from './ui/Title.svelte';
   import ResultDialog from './ui/ResultDialog.svelte';
 
@@ -72,6 +73,8 @@
     let prev = createInitialState(map, gamePlayers, 42);
     let cur = structuredClone(prev);
     const rng = new Rng(42);
+    const aiRng = new Rng(123);
+    const aiController = createAIController(1 as PlayerId, 'normal', aiRng);
 
     const cellPx = 20;
     drawTerrain(app, map, cellPx);
@@ -155,8 +158,12 @@
       tickRateHz: 30,
       onTick: () => {
         prev = cur;
-        const commands = inputCollector.flush();
-        const frame: InputFrame = { tick: cur.tick, commands };
+        const humanCommands = inputCollector.flush();
+        const aiCommands = aiController.update(cur);
+        const frame: InputFrame = {
+          tick: cur.tick,
+          commands: [...humanCommands, ...aiCommands],
+        };
         cur = tick(prev, [frame], rng);
       },
       onRender: (alpha) => {
