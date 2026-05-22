@@ -104,7 +104,9 @@ war-of-dots/
 │   ├── CLAUDE.md            # ← このファイル
 │   ├── DESIGN.md
 │   ├── TASKS.md
-│   └── SETUP.md             # 環境セットアップ実録
+│   ├── SETUP.md             # 環境セットアップ実録
+│   ├── skills/              # オンデマンドスキル（コミット規約・タスク完了等）
+│   └── archive/             # 完了タスク詳細・旧 changelog・Phase2-5 概要
 ├── pnpm-workspace.yaml
 └── README.md
 ```
@@ -286,53 +288,23 @@ test(sim): add deterministic replay equivalence test
 
 ---
 
-## 9. 最初に投げるべきタスク（順番付き要約）
-
-詳細は `TASKS.md` 参照。
-
-1. リポジトリ初期化（pnpm workspace, Vite+Svelte+TS+Pixi スケルトン）
-2. 決定論 RNG（mulberry32）+ Vitest
-3. `core/sim` の型定義（GameState 等）
-4. 純関数 `tick()` の空実装 + テスト
-5. ゲームループ（30Hz fixed + RAF render）
-6. PixiJS ステージ初期化（背景・グリッド）
-7. A* パスファインディング
-8. マップ読み込み + ユニット出現
-9. 入力（矩形選択・移動命令）
-10. 戦闘解決・都市占領・勝敗判定
-11. AI v0
-12. リプレイ録画/再生
-13. Cloudflare Pages デプロイ
-
----
-
-## 10. リンク（雛形）
+## 9. リンク
 
 - 設計詳細: `DESIGN.md`
-- 作業順手順: `TASKS.md`
-- 環境セットアップ: `SETUP.md`（Windows での実録手順とトラブルシュート）
-- 開発フロー: `CONTRIBUTING.md`（後で作成）
-- マップ仕様: `packages/maps/README.md`（後で作成）
+- 作業手順（次タスク確認用）: `TASKS.md`
+- 環境セットアップ: `SETUP.md`
+- 完了タスク詳細・変更履歴: `archive/` 配下
 - ライセンス: `../LICENSE`（MIT）
 
 ---
 
-## 11. 変更履歴
+## 10. 変更履歴（最新 3 件 — 全履歴は `archive/changelog.md`）
 
 | 日付 | バージョン | 変更 |
 |---|---|---|
-| 2026-05-19 | 1.0.0 | 初版作成 |
-| 2026-05-19 | 1.0.1 | P1-T1 完了。ディレクトリ構成に `@war-of-dots/*` スコープ・`.claude/` 配下を明記、§7.1 に SETUP.md 確認を追加、§10 に SETUP.md リンクを追加 |
-| 2026-05-19 | 1.0.2 | P1-T2 完了（決定論 RNG）、P1-T3 完了（型定義）。M0 マイルストーン達成。GitHub リポジトリ `matun02/dots-war-sim` を開設 |
-| 2026-05-19 | 1.0.3 | P1-T4 完了（tick orchestrator + 8 空ステップ関数）。`packages/core/src/sim/tick.ts` + `steps/` 配下 8 ファイル + テスト 5 件。決定論テスト・spy テスト・immutability テスト全 pass |
-| 2026-05-20 | 1.0.4 | P1-T5 完了（ゲームループ）。`apps/web/src/game/loop.ts` — accumulator パターン + スパイク対策 + jsdom テスト環境。テスト 6 件全 pass |
-| 2026-05-20 | 1.0.5 | Claude Code スキル追加。`.claude/skills/` に TASKS.md 更新・CLAUDE.md 更新・ドキュメント commit/push の 3 スキル |
-| 2026-05-20 | 1.0.6 | P1-T6 完了（PixiJS ステージ + グリッド）。`apps/web/src/game/render/stage.ts` + `grid.ts` — PixiJS v8 非同期初期化・64×36 グリッド描画・リサイズ対応 |
-| 2026-05-20 | 1.0.7 | P1-T7 完了（マップ JSON + 地形描画）。`packages/maps/` — valibot スキーマ + loadMap バリデーション + first-blood.json（64×36, 5都市, 山脈）。`terrain.ts` + `cities.ts` で地形・都市描画 |
-| 2026-05-20 | 1.0.8 | P1-T8 完了（ユニット生産 + 直線移動）。`constants.ts` + `init.ts` + `produce-units.ts` + `move-units.ts` + `units.ts` レンダラー。ゲームループ統合。テスト 17 件追加（合計 53 件） |
-| 2026-05-20 | 1.0.9 | P1-T9 完了（矩形選択 + 移動命令）。`apply-inputs.ts` + `input/selection.ts` + `input/commands.ts` + `selection-box.ts`。units.ts に選択リング追加。テスト 9 件追加（合計 62 件） |
-| 2026-05-21 | 1.0.10 | P1-T10 完了（A* パスファインディング）。`pathfinding/binary-heap.ts` + `astar.ts` — 8方向・整数コスト・オクタイルh・決定論tie-break。`recompute-paths.ts` — 上限8件/tick。`move-units.ts` — path追従版+直線フォールバック。テスト 18 件追加（合計 80 件） |
-| 2026-05-21 | 1.0.11 | P1-T11 完了（戦闘・死亡処理・都市占領）。`spatial-hash.ts` — 配列ベース空間ハッシュ。`resolve-combat.ts` — id昇順処理・ATTACK_RANGE=1.5・同時攻撃。`remove-dead.ts` — supplyUsed解放。`update-city-capture.ts` — 60tick中立化・30tick占領・POST_CAPTURE_COOLDOWN=150。テスト 23 件追加（合計 103 件） |
+| 2026-05-21 | 1.0.11 | P1-T11 完了（戦闘・死亡処理・都市占領）。テスト 23 件追加（合計 103 件） |
+| 2026-05-21 | 1.0.10 | P1-T10 完了（A* パスファインディング）。テスト 18 件追加（合計 80 件） |
+| 2026-05-20 | 1.0.9 | P1-T9 完了（矩形選択 + 移動命令）。テスト 9 件追加（合計 62 件） |
 
 ---
 
