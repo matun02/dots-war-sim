@@ -49,7 +49,7 @@
     1: 0xff8844,
   };
 
-  function cleanupGame(): void {
+  function stopLoop(): void {
     if (cleanupInput) {
       cleanupInput();
       cleanupInput = null;
@@ -58,6 +58,10 @@
       loop.stop();
       loop = null;
     }
+  }
+
+  function cleanupGame(): void {
+    stopLoop();
     if (app) {
       destroyStage(app);
       app = null;
@@ -204,18 +208,14 @@
     loop.start();
   }
 
-  async function startReplay(): Promise<void> {
-    if (!lastReplay) return;
-    cleanupGame();
+  function startReplay(): void {
+    if (!lastReplay || !app) return;
+    stopLoop();
     screen = 'replay';
 
-    await new Promise<void>((r) => {
-      requestAnimationFrame(() => r());
-    });
+    app.stage.removeChildren();
 
-    app = await createStage(canvasEl);
     const map = loadMap(firstBloodJson);
-
     const cellPx = 20;
     drawTerrain(app, map, cellPx);
     drawGrid(app, map.width, map.height, cellPx);
