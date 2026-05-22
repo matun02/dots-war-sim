@@ -233,3 +233,30 @@
 - **見積**: 2 日
 - **実績**: 30 分
 - **学び**: `noUncheckedIndexedAccess` で `T | undefined` 型。空間ハッシュは `EntityId[][]` で実装（Map/Set 不可）。
+
+---
+
+## P1-T12: 勝敗判定 + 結果画面 ✅ 完了 (2026-05-22, commit `e5be5aa`)
+
+- **目的**: 勝ち負けが決まる + タイトル画面から結果画面への遷移フロー構築
+- **入力**: `DESIGN.md` 章 1.1
+- **作業内容**:
+  1. `packages/core/src/sim/constants.ts` — `GAME_TIME_LIMIT_TICKS = 36000` 追加
+  2. `packages/core/src/sim/steps/evaluate-game-end.ts` — domination/annihilation/timeout/draw 判定
+  3. `apps/web/src/ui/Title.svelte` — タイトル画面
+  4. `apps/web/src/ui/ResultDialog.svelte` — 結果オーバーレイ（Victory/Defeat/Draw）
+  5. `apps/web/src/App.svelte` — 画面遷移ロジック（title → game → result → title/rematch）
+- **成果物**: evaluate-game-end + Title + ResultDialog + 画面遷移 + テスト 8 件
+- **受け入れ基準**:
+  - [x] 片方のプレイヤーの都市・ユニットが全て消えると勝敗が確定する
+  - [x] 全都市占領で domination 勝利が発生する
+  - [x] 20分（36000 tick）到達で timeout 勝利 or draw が発生する
+  - [x] result 確定後に result が上書きされない
+  - [x] タイトル画面で "Start Game" → ゲーム開始
+  - [x] ゲーム終了 → 結果画面表示
+  - [x] "Rematch" で同マップ再戦
+  - [x] "Title" でタイトル画面に戻る
+  - [x] typecheck / lint / test 全 green
+- **見積**: 1 日
+- **実績**: 30 分
+- **学び**: Svelte 5 では `createEventDispatcher` ではなく props callback でイベントを通知。`bind:this` の canvas は `$state` 不要（warning は無害）。テストで domination/annihilation テストケースを作る際、都市所有状態に注意（全都市所有で意図せず domination が発火する）。
