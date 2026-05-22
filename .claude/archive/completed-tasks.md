@@ -282,3 +282,29 @@
 - **見積**: 2 日
 - **実績**: 20 分
 - **学び**: AI の Rng は sim 用 Rng と別インスタンスにする（AI の思考は sim 外）。`import type` と `import` の使い分け — 型としてのみ使う場合は `import type` を使わないと `isolatedModules` 違反になる可能性あり。ターゲットスコアの sort で tie-break に city.id を使い全順序を保証。
+
+---
+
+## P1-T14: リプレイ録画 / 再生 ✅ 完了 (2026-05-22, commit `44ded2a`)
+
+- **目的**: 試合中の全 InputFrame を記録し、試合終了後にリプレイとして保存・再生できるようにする
+- **作業内容**:
+  1. `packages/core/src/replay.ts` — Replay 型定義 + REPLAY_VERSION
+  2. `packages/core/src/sim/hash.ts` — hashState() 決定論的 32bit 状態ハッシュ（XOR フォールド、id ソート済み）
+  3. `apps/web/src/game/replay/recorder.ts` — ReplayRecorder（InputFrame バッファ）
+  4. `apps/web/src/game/replay/player.ts` — ReplayPlayer（createInitialState + tick で状態再構築、seekTo 対応）
+  5. `apps/web/src/game/replay/storage.ts` — IndexedDB 保存（idb-keyval、createdAt キー）
+  6. `apps/web/src/App.svelte` — recorder 統合 + replay 画面 + 一時停止/再開
+  7. `apps/web/src/ui/ResultDialog.svelte` — "Watch Replay" ボタン追加
+- **成果物**: replay.ts + hash.ts + recorder + player + storage + UI 統合 + テスト 12 件
+- **受け入れ基準**:
+  - [x] 試合終了後にリプレイデータが IndexedDB に保存される
+  - [x] ResultDialog に「Watch Replay」ボタンが表示される
+  - [x] リプレイを再生すると同じ展開が再現される（決定論テスト）
+  - [x] 再生中に一時停止/再開ができる
+  - [x] 再生終了後に result 画面に戻る
+  - [x] hashState が決定論的に動作する
+  - [x] typecheck / lint / test 全 green（合計 132 件）
+- **見積**: 2 日
+- **実績**: 30 分
+- **学び**: strict モードでは配列の `for (let i=0; ...)` インデックスアクセスが `possibly undefined` になる。`for...of` で回避。Rng クラスに reset メソッドがないため seekTo では新インスタンス生成で対応。idb-keyval の createStore で DB 名とストア名を分離指定。
