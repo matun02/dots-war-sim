@@ -6,6 +6,8 @@ export const CAPTURE_NEUTRALIZE_TICKS = 60;
 export const CAPTURE_CLAIM_TICKS = 30;
 export const POST_CAPTURE_COOLDOWN_TICKS = 150;
 
+export const GAME_TIME_LIMIT_TICKS = 36000;
+
 export const UNIT_STATS = {
   light: {
     speed: 4,

@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onDestroy } from 'svelte';
   import {
     type InputFrame,
+    type GameResult,
     type Player,
     type PlayerId,
     Rng,
@@ -18,21 +19,57 @@
   import { createLoop, type LoopHandle } from './game/loop';
   import { createInputCollector } from './game/input/commands';
   import { unitsInRect, type SelectionBox } from './game/input/selection';
+  import Title from './ui/Title.svelte';
+  import ResultDialog from './ui/ResultDialog.svelte';
 
+  type Screen = 'title' | 'game' | 'result';
+
+  let screen: Screen = $state('title');
   let canvasEl: HTMLCanvasElement;
   let app: Application | null = null;
   let loop: LoopHandle | null = null;
   let cleanupInput: (() => void) | null = null;
+  let gameResult: GameResult | null = $state(null);
 
-  onMount(async () => {
+  const players: Player[] = [
+    { id: 0 as PlayerId, name: 'Player 1', color: 0x4488ff, alive: true },
+    { id: 1 as PlayerId, name: 'Player 2', color: 0xff8844, alive: true },
+  ];
+
+  const playerColors: Record<number, number> = {
+    0: 0x4488ff,
+    1: 0xff8844,
+  };
+
+  function cleanupGame(): void {
+    if (cleanupInput) {
+      cleanupInput();
+      cleanupInput = null;
+    }
+    if (loop) {
+      loop.stop();
+      loop = null;
+    }
+    if (app) {
+      destroyStage(app);
+      app = null;
+    }
+    gameResult = null;
+  }
+
+  async function startGame(): Promise<void> {
+    cleanupGame();
+    screen = 'game';
+
+    await new Promise<void>((r) => {
+      requestAnimationFrame(() => r());
+    });
+
     app = await createStage(canvasEl);
     const map = loadMap(firstBloodJson);
 
-    const players: Player[] = [
-      { id: 0 as PlayerId, name: 'Player 1', color: 0x4488ff, alive: true },
-      { id: 1 as PlayerId, name: 'Player 2', color: 0xff8844, alive: true },
-    ];
-    let prev = createInitialState(map, players, 42);
+    const gamePlayers = players.map((p) => ({ ...p, alive: true }));
+    let prev = createInitialState(map, gamePlayers, 42);
     let cur = structuredClone(prev);
     const rng = new Rng(42);
 
@@ -125,28 +162,46 @@
       onRender: (alpha) => {
         cityRenderer.update(cur.cities);
         unitRenderer.update(prev.units, cur.units, alpha, inputCollector.selectedIds);
+
+        if (cur.result !== null && screen === 'game') {
+          gameResult = cur.result;
+          screen = 'result';
+        }
       },
     });
     loop.start();
-  });
+  }
+
+  function handleRematch(): void {
+    startGame();
+  }
+
+  function handleTitle(): void {
+    cleanupGame();
+    screen = 'title';
+  }
 
   onDestroy(() => {
-    if (cleanupInput) {
-      cleanupInput();
-      cleanupInput = null;
-    }
-    if (loop) {
-      loop.stop();
-      loop = null;
-    }
-    if (app) {
-      destroyStage(app);
-      app = null;
-    }
+    cleanupGame();
   });
 </script>
 
-<canvas bind:this={canvasEl}></canvas>
+{#if screen === 'title'}
+  <Title onstart={startGame} />
+{/if}
+
+{#if screen === 'game' || screen === 'result'}
+  <canvas bind:this={canvasEl}></canvas>
+{/if}
+
+{#if screen === 'result' && gameResult}
+  <ResultDialog
+    result={gameResult}
+    {playerColors}
+    onrematch={handleRematch}
+    ontitle={handleTitle}
+  />
+{/if}
 
 <style>
   :global(html, body) {
