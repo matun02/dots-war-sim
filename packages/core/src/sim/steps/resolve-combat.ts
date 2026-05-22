@@ -26,6 +26,8 @@ export function resolveCombat(state: GameState, _rng: Rng): void {
 
     if (attacker.attackCooldownTicks > 0) {
       attacker.attackCooldownTicks--;
+    }
+    if (attacker.attackCooldownTicks > 0) {
       continue;
     }
 

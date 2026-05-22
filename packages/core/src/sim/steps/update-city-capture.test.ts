@@ -148,4 +148,24 @@ describe('updateCityCapture', () => {
     expect(state.cities[0]!.owner).toBe(pid(0));
     expect(state.cities[0]!.captureProgressTicks).toBe(0);
   });
+
+  it('resets capture progress when owner units reclaim the tile', () => {
+    // Enemy had built up 50/60 ticks of capture progress
+    const city = makeCity({
+      id: cid(0),
+      owner: pid(0),
+      captureProgressTicks: 50,
+      capturingPlayer: pid(1),
+    });
+    // Now only the owner's units are on the tile (defender reclaimed)
+    const unit = makeUnit(eid(0), pid(0), { x: 5, y: 5 });
+    const state = makeState([city], [unit]);
+
+    updateCityCapture(state);
+
+    // Progress must be fully reset — enemy can't resume from 50 later
+    expect(state.cities[0]!.captureProgressTicks).toBe(0);
+    expect(state.cities[0]!.capturingPlayer).toBeNull();
+    expect(state.cities[0]!.owner).toBe(pid(0));
+  });
 });

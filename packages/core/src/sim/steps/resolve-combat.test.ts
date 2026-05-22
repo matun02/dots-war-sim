@@ -109,20 +109,19 @@ describe('resolveCombat', () => {
   });
 
   it('attacks again after cooldown reaches 0', () => {
+    // cooldown=1 → decremented to 0 on this tick → unit attacks immediately
     const u0 = makeUnit({ id: eid(0), owner: pid(0), pos: { x: 5, y: 5 }, attackCooldownTicks: 1, hp: 10 });
     const u1 = makeUnit({ id: eid(1), owner: pid(1), pos: { x: 5, y: 5 }, hp: 10 });
     const state = makeState([u0, u1]);
 
     resolveCombat(state, rng);
     const unit0a = state.units.find((u) => (u.id as number) === 0)!;
-    expect(unit0a.attackCooldownTicks).toBe(0);
+    const unit1a = state.units.find((u) => (u.id as number) === 1)!;
+    // u0 cooldown was 1, decremented to 0, so u0 attacks this tick
+    expect(unit0a.attackCooldownTicks).toBe(UNIT_STATS.light.attackIntervalTicks);
+    expect(unit1a.hp).toBe(10 - UNIT_STATS.light.attack);
+    // u1 also attacks u0
     expect(unit0a.hp).toBe(10 - UNIT_STATS.light.attack);
-
-    resolveCombat(state, rng);
-    const unit0b = state.units.find((u) => (u.id as number) === 0)!;
-    const unit1b = state.units.find((u) => (u.id as number) === 1)!;
-    expect(unit0b.attackCooldownTicks).toBe(UNIT_STATS.light.attackIntervalTicks);
-    expect(unit1b.hp).toBe(10 - UNIT_STATS.light.attack);
   });
 
   it('does not attack units of the same owner', () => {

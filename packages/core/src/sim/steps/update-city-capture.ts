@@ -41,6 +41,8 @@ export function updateCityCapture(state: GameState): void {
     const faction = factions[0]!;
 
     if (city.owner !== null && city.owner === faction) {
+      city.captureProgressTicks = 0;
+      city.capturingPlayer = null;
       continue;
     }
 
