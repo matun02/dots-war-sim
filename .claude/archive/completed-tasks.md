@@ -260,3 +260,25 @@
 - **見積**: 1 日
 - **実績**: 30 分
 - **学び**: Svelte 5 では `createEventDispatcher` ではなく props callback でイベントを通知。`bind:this` の canvas は `$state` 不要（warning は無害）。テストで domination/annihilation テストケースを作る際、都市所有状態に注意（全都市所有で意図せず domination が発火する）。
+
+---
+
+## P1-T13: AI v0（ルールベース） ✅ 完了 (2026-05-22, commit `c617ac5`)
+
+- **目的**: AI と試合になる
+- **入力**: `DESIGN.md` 章 9.1, 9.3, 9.4
+- **作業内容**:
+  1. `apps/web/src/game/ai/controller.ts` — AIController factory + 難易度設定（easy/normal/hard）
+  2. `apps/web/src/game/ai/controller.test.ts` — 8 テストケース
+  3. `apps/web/src/App.svelte` — AI 統合（別 Rng インスタンス + onTick でコマンド合流）
+- **成果物**: AI controller + テスト + App.svelte 統合
+- **受け入れ基準**:
+  - [x] 起動 → AI 相手にプレイできる
+  - [x] AI が中立都市を狙ってユニットを派遣する
+  - [x] AI が自都市を防衛しようとする
+  - [x] AI のコマンドが InputFrame 経由で正しく tick に渡される
+  - [x] 決定論テスト: 同一条件で同じ AI 行動
+  - [x] typecheck / lint / test 全 green（合計 120 件）
+- **見積**: 2 日
+- **実績**: 20 分
+- **学び**: AI の Rng は sim 用 Rng と別インスタンスにする（AI の思考は sim 外）。`import type` と `import` の使い分け — 型としてのみ使う場合は `import type` を使わないと `isolatedModules` 違反になる可能性あり。ターゲットスコアの sort で tie-break に city.id を使い全順序を保証。
