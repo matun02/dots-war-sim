@@ -36,7 +36,7 @@
   let loop: LoopHandle | null = null;
   let cleanupInput: (() => void) | null = null;
   let gameResult: GameResult | null = $state(null);
-  let lastReplay: Replay | null = null;
+  let lastReplay: Replay | null = $state(null);
   let replayPaused = $state(false);
 
   const players: Player[] = [
