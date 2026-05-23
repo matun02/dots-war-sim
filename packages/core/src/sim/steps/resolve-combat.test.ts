@@ -160,4 +160,80 @@ describe('resolveCombat', () => {
     expect(state.units.find((u) => (u.id as number) === 0)!.hp).toBe(0);
     expect(state.units.find((u) => (u.id as number) === 1)!.hp).toBe(0);
   });
+
+  it('heavy kills light in one hit (attack=3 vs hp=1)', () => {
+    const heavy = makeUnit({
+      id: eid(0),
+      owner: pid(0),
+      pos: { x: 5, y: 5 },
+      kind: 'heavy',
+      hp: UNIT_STATS.heavy.hp,
+    });
+    const light = makeUnit({
+      id: eid(1),
+      owner: pid(1),
+      pos: { x: 5, y: 5 },
+      kind: 'light',
+      hp: UNIT_STATS.light.hp,
+    });
+    const state = makeState([heavy, light]);
+
+    resolveCombat(state, rng);
+
+    expect(state.units.find((u) => (u.id as number) === 1)!.hp).toBe(
+      UNIT_STATS.light.hp - UNIT_STATS.heavy.attack,
+    );
+    expect(state.units.find((u) => (u.id as number) === 0)!.hp).toBe(
+      UNIT_STATS.heavy.hp - UNIT_STATS.light.attack,
+    );
+  });
+
+  it('light needs 5 attacks to kill heavy (attack=1 vs hp=5)', () => {
+    const heavy = makeUnit({
+      id: eid(0),
+      owner: pid(0),
+      pos: { x: 5, y: 5 },
+      kind: 'heavy',
+      hp: UNIT_STATS.heavy.hp,
+      attackCooldownTicks: 999,
+    });
+    const light = makeUnit({
+      id: eid(1),
+      owner: pid(1),
+      pos: { x: 5, y: 5 },
+      kind: 'light',
+      hp: 999,
+    });
+    const state = makeState([heavy, light]);
+
+    for (let i = 0; i < 5; i++) {
+      light.attackCooldownTicks = 0;
+      resolveCombat(state, rng);
+    }
+
+    expect(state.units.find((u) => (u.id as number) === 0)!.hp).toBe(0);
+  });
+
+  it('heavy uses attackIntervalTicks=30 for cooldown', () => {
+    const heavy = makeUnit({
+      id: eid(0),
+      owner: pid(0),
+      pos: { x: 5, y: 5 },
+      kind: 'heavy',
+      hp: UNIT_STATS.heavy.hp,
+    });
+    const target = makeUnit({
+      id: eid(1),
+      owner: pid(1),
+      pos: { x: 5, y: 5 },
+      hp: 999,
+    });
+    const state = makeState([heavy, target]);
+
+    resolveCombat(state, rng);
+
+    expect(state.units.find((u) => (u.id as number) === 0)!.attackCooldownTicks).toBe(
+      UNIT_STATS.heavy.attackIntervalTicks,
+    );
+  });
 });

@@ -142,6 +142,28 @@
         y: e.offsetY / cellPx,
       };
 
+      const dx = selectionBox.endWorld.x - selectionBox.startWorld.x;
+      const dy = selectionBox.endWorld.y - selectionBox.startWorld.y;
+      const dragDist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dragDist < 0.5) {
+        const cx = Math.floor(selectionBox.endWorld.x);
+        const cy = Math.floor(selectionBox.endWorld.y);
+        const ownCity = cur.cities.find(
+          (c) =>
+            c.owner === (0 as PlayerId) &&
+            Math.floor(c.pos.x) === cx &&
+            Math.floor(c.pos.y) === cy,
+        );
+        if (ownCity) {
+          const next = ownCity.production === 'light' ? 'heavy' : 'light';
+          inputCollector.setProductionCommand(ownCity.id, next);
+          selectionBox = null;
+          selectionRenderer.hide();
+          return;
+        }
+      }
+
       const ids = unitsInRect(
         cur.units,
         0,

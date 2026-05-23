@@ -15,6 +15,7 @@ export const UNIT_STATS = {
     hp: 1,
     attackIntervalTicks: 15,
     produceIntervalTicks: 60,
+    supplyCost: 1,
   },
   heavy: {
     speed: 2,
@@ -22,5 +23,6 @@ export const UNIT_STATS = {
     hp: 5,
     attackIntervalTicks: 30,
     produceIntervalTicks: 180,
+    supplyCost: 2,
   },
 } as const;

@@ -1,4 +1,5 @@
 import type { GameState } from '../types.js';
+import { UNIT_STATS } from '../constants.js';
 
 export function removeDead(state: GameState): void {
   const { units, cities } = state;
@@ -7,7 +8,7 @@ export function removeDead(state: GameState): void {
     if (unit.hp <= 0) {
       for (const city of cities) {
         if (city.id === unit.homeCity) {
-          city.supplyUsed--;
+          city.supplyUsed -= UNIT_STATS[unit.kind].supplyCost;
           break;
         }
       }

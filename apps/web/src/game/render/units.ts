@@ -5,7 +5,7 @@ import {
   Sprite,
   type Texture,
 } from 'pixi.js';
-import type { EntityId, Unit } from '@dots-war-sim/core';
+import type { EntityId, Unit, UnitKind } from '@dots-war-sim/core';
 
 const PLAYER_COLORS: Record<number, number> = {
   0: 0x4488ff,
@@ -13,6 +13,11 @@ const PLAYER_COLORS: Record<number, number> = {
 };
 
 const FALLBACK_COLOR = 0xcccccc;
+
+const UNIT_RADIUS: Record<UnitKind, number> = {
+  light: 0.25,
+  heavy: 0.35,
+};
 
 export function createUnitRenderer(
   app: Application,
@@ -29,18 +34,20 @@ export function createUnitRenderer(
   const container = new Container();
   const sprites: Sprite[] = [];
 
-  const radius = cellPx * 0.25;
-  const textures = new Map<number, Texture>();
+  const textures = new Map<string, Texture>();
   for (const [playerId, color] of Object.entries(PLAYER_COLORS)) {
-    const g = new Graphics();
-    g.circle(0, 0, radius);
-    g.fill(color);
-    const tex = app.renderer.generateTexture({
-      target: g,
-      resolution: 2,
-    });
-    textures.set(Number(playerId), tex);
-    g.destroy();
+    for (const kind of ['light', 'heavy'] as const) {
+      const radius = cellPx * UNIT_RADIUS[kind];
+      const g = new Graphics();
+      g.circle(0, 0, radius);
+      g.fill(color);
+      const tex = app.renderer.generateTexture({
+        target: g,
+        resolution: 2,
+      });
+      textures.set(`${playerId}-${kind}`, tex);
+      g.destroy();
+    }
   }
 
   const selectionRings = new Graphics();
@@ -73,8 +80,9 @@ export function createUnitRenderer(
         const cur = curUnits[i]!;
         const sprite = getOrCreateSprite(i);
         sprite.visible = true;
+        const texKey = `${cur.owner}-${cur.kind}`;
         sprite.texture =
-          textures.get(cur.owner) ?? textures.values().next().value!;
+          textures.get(texKey) ?? textures.values().next().value!;
         sprite.tint = PLAYER_COLORS[cur.owner] ?? FALLBACK_COLOR;
 
         const prev = prevUnits.find((u) => u.id === cur.id);
@@ -91,7 +99,8 @@ export function createUnitRenderer(
         sprite.y = sy;
 
         if (selectedSet?.has(cur.id)) {
-          selectionRings.circle(sx, sy, radius + 2);
+          const r = cellPx * UNIT_RADIUS[cur.kind];
+          selectionRings.circle(sx, sy, r + 2);
           selectionRings.stroke({ color: 0xffffff, alpha: 0.8, width: 1.5 });
         }
       }

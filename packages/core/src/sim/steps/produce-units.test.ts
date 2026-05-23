@@ -109,4 +109,54 @@ describe('produceUnits', () => {
     expect(state.units[1]!.id).toBe(1);
     expect(state.nextEntityId).toBe(2);
   });
+
+  it('produces a heavy unit after 180 ticks', () => {
+    const city = makeCity({ production: 'heavy' });
+    const state = makeState([city]);
+
+    produceUnits(state, rng);
+    expect(state.units).toHaveLength(1);
+    expect(state.units[0]!.kind).toBe('heavy');
+    expect(state.units[0]!.hp).toBe(UNIT_STATS.heavy.hp);
+    expect(city.produceCooldownTicks).toBe(UNIT_STATS.heavy.produceIntervalTicks);
+    expect(city.supplyUsed).toBe(2);
+  });
+
+  it('blocks heavy production when supplyUsed + 2 > SUPPLY_MAX', () => {
+    const city = makeCity({ production: 'heavy', supplyUsed: 4 });
+    const state = makeState([city]);
+
+    produceUnits(state, rng);
+    expect(state.units).toHaveLength(0);
+  });
+
+  it('allows heavy production when supplyUsed + 2 = SUPPLY_MAX', () => {
+    const city = makeCity({ production: 'heavy', supplyUsed: 3 });
+    const state = makeState([city]);
+
+    produceUnits(state, rng);
+    expect(state.units).toHaveLength(1);
+    expect(city.supplyUsed).toBe(5);
+  });
+
+  it('tracks supply correctly with mixed light and heavy', () => {
+    const city = makeCity({ production: 'light', supplyUsed: 0 });
+    const state = makeState([city]);
+
+    produceUnits(state, rng);
+    expect(city.supplyUsed).toBe(1);
+
+    city.produceCooldownTicks = 0;
+    city.production = 'heavy';
+    produceUnits(state, rng);
+    expect(city.supplyUsed).toBe(3);
+
+    city.produceCooldownTicks = 0;
+    produceUnits(state, rng);
+    expect(city.supplyUsed).toBe(5);
+
+    city.produceCooldownTicks = 0;
+    produceUnits(state, rng);
+    expect(state.units).toHaveLength(3);
+  });
 });

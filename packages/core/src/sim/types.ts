@@ -87,6 +87,12 @@ export type Command =
       ids: EntityId[];
       from: Vec2;
       to: Vec2;
+    }
+  | {
+      type: 'set-production';
+      player: PlayerId;
+      cityId: CityId;
+      production: UnitKind;
     };
 
 export interface InputFrame {

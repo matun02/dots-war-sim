@@ -6,15 +6,15 @@ export function produceUnits(state: GameState, _rng: Rng): void {
   for (const city of state.cities) {
     if (city.owner === null) continue;
     if (city.capturingPlayer !== null) continue;
-    if (city.supplyUsed >= SUPPLY_MAX) continue;
+    const kind = city.production;
+    const stats = UNIT_STATS[kind];
+
+    if (city.supplyUsed + stats.supplyCost > SUPPLY_MAX) continue;
 
     if (city.produceCooldownTicks > 0) {
       city.produceCooldownTicks--;
       continue;
     }
-
-    const kind = city.production;
-    const stats = UNIT_STATS[kind];
 
     state.units.push({
       id: state.nextEntityId++ as EntityId,
@@ -28,7 +28,7 @@ export function produceUnits(state: GameState, _rng: Rng): void {
       attackCooldownTicks: 0,
     });
 
-    city.supplyUsed++;
+    city.supplyUsed += stats.supplyCost;
     city.produceCooldownTicks = stats.produceIntervalTicks;
   }
 }

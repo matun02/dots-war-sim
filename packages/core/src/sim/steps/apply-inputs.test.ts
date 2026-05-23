@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type {
+  City,
+  CityId,
   EntityId,
   GameState,
   InputFrame,
@@ -179,5 +181,83 @@ describe('applyInputs', () => {
 
     expect(state.units[0]!.path).toBeNull();
     expect(state.units[0]!.goal).toEqual({ x: 10, y: 10 });
+  });
+
+  it('set-production changes own city production', () => {
+    const city: City = {
+      id: 0 as CityId,
+      pos: { x: 5, y: 5 },
+      owner: 0 as PlayerId,
+      production: 'light',
+      produceCooldownTicks: 0,
+      captureProgressTicks: 0,
+      capturingPlayer: null,
+      supplyUsed: 0,
+    };
+    const state = makeState([]);
+    state.cities = [city];
+    const frame: InputFrame = {
+      tick: 0,
+      commands: [
+        {
+          type: 'set-production',
+          player: 0 as PlayerId,
+          cityId: 0 as CityId,
+          production: 'heavy',
+        },
+      ],
+    };
+
+    applyInputs(state, [frame]);
+
+    expect(state.cities[0]!.production).toBe('heavy');
+  });
+
+  it('set-production ignores other player city', () => {
+    const city: City = {
+      id: 0 as CityId,
+      pos: { x: 5, y: 5 },
+      owner: 1 as PlayerId,
+      production: 'light',
+      produceCooldownTicks: 0,
+      captureProgressTicks: 0,
+      capturingPlayer: null,
+      supplyUsed: 0,
+    };
+    const state = makeState([]);
+    state.cities = [city];
+    const frame: InputFrame = {
+      tick: 0,
+      commands: [
+        {
+          type: 'set-production',
+          player: 0 as PlayerId,
+          cityId: 0 as CityId,
+          production: 'heavy',
+        },
+      ],
+    };
+
+    applyInputs(state, [frame]);
+
+    expect(state.cities[0]!.production).toBe('light');
+  });
+
+  it('set-production ignores non-existent cityId', () => {
+    const state = makeState([]);
+    state.cities = [];
+    const frame: InputFrame = {
+      tick: 0,
+      commands: [
+        {
+          type: 'set-production',
+          player: 0 as PlayerId,
+          cityId: 99 as CityId,
+          production: 'heavy',
+        },
+      ],
+    };
+
+    expect(() => applyInputs(state, [frame])).not.toThrow();
   });
 });

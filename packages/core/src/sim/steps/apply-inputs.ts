@@ -26,6 +26,16 @@ export function applyInputs(
         case 'line':
           // Not implemented in P1-T9
           break;
+
+        case 'set-production': {
+          const city = state.cities.find(
+            (c) => c.id === cmd.cityId && c.owner === cmd.player,
+          );
+          if (city) {
+            city.production = cmd.production;
+          }
+          break;
+        }
       }
     }
   }

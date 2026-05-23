@@ -122,4 +122,24 @@ describe('removeDead', () => {
     expect(state.cities[0]!.supplyUsed).toBe(0);
     expect(state.cities[1]!.supplyUsed).toBe(1);
   });
+
+  it('releases supplyCost=2 when a heavy unit dies', () => {
+    const heavy = makeUnit(eid(0), 0, cid(0));
+    heavy.kind = 'heavy';
+    const state = makeState([heavy], [makeCity(cid(0), 4)]);
+
+    removeDead(state);
+
+    expect(state.cities[0]!.supplyUsed).toBe(2);
+  });
+
+  it('releases supplyCost=1 when a light unit dies', () => {
+    const light = makeUnit(eid(0), 0, cid(0));
+    light.kind = 'light';
+    const state = makeState([light], [makeCity(cid(0), 3)]);
+
+    removeDead(state);
+
+    expect(state.cities[0]!.supplyUsed).toBe(2);
+  });
 });
