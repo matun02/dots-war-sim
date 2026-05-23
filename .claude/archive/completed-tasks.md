@@ -308,3 +308,28 @@
 - **見積**: 2 日
 - **実績**: 30 分
 - **学び**: strict モードでは配列の `for (let i=0; ...)` インデックスアクセスが `possibly undefined` になる。`for...of` で回避。Rng クラスに reset メソッドがないため seekTo では新インスタンス生成で対応。idb-keyval の createStore で DB 名とストア名を分離指定。
+
+---
+
+## P1-T15: Cloudflare Pages デプロイ ✅ 完了 (2026-05-23, commit `4189b9a`)
+
+- **目的**: ゲームを Cloudflare Pages にデプロイし、公開 URL で誰でもプレイできるようにする
+- **作業内容**:
+  1. `apps/web/vite.config.ts` — `base: '/'` 明示 + `manualChunks` で PixiJS 分割
+  2. `apps/web/public/_redirects` — SPA フォールバック (`/* /index.html 200`)
+  3. `npx wrangler pages project create dots-war-sim` でプロジェクト作成
+  4. `npx wrangler pages deploy apps/web/dist --project-name=dots-war-sim --branch=main` でデプロイ
+  5. 公開 URL で動作確認（タイトル → ゲーム → AI 対戦動作確認）
+- **成果物**: 公開 URL https://dots-war-sim.pages.dev/ + ビルド最適化設定
+- **受け入れ基準**:
+  - [x] `pnpm -r build` がローカルで成功する
+  - [x] Cloudflare Pages にデプロイされ、公開 URL でゲームが動作する
+  - [x] タイトル → ゲーム開始 → AI 対戦が動作する
+  - [x] WebGL2 エラーが出ない
+  - [x] ブラウザコンソールにエラーがない
+  - [x] `pnpm -r typecheck` 通る
+  - [x] `pnpm lint` 通る
+  - [x] `pnpm -r test` 通る（既存 132 件全て green）
+- **見積**: 半日
+- **実績**: 15 分
+- **学び**: Cloudflare Pages の本番 URL (`*.pages.dev`) は `--branch=main` でデプロイしないと反映されない。manualChunks で PixiJS を分離するとメインチャンクが 289 KB → 60 KB に縮小。バンドル合計 gz ~157 KB で 500 KB 目標を大幅にクリア。
