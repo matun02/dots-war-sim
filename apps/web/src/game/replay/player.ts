@@ -5,8 +5,8 @@ import {
   Rng,
   createInitialState,
   tick,
-} from '@war-of-dots/core';
-import { loadMap, firstBloodJson } from '@war-of-dots/maps';
+} from '@dots-war-sim/core';
+import { loadMap, firstBloodJson } from '@dots-war-sim/maps';
 
 export interface ReplayPlayer {
   currentTick(): number;

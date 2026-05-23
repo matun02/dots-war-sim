@@ -1,5 +1,5 @@
 import { type Application, Container, Graphics } from 'pixi.js';
-import type { Vec2 } from '@war-of-dots/core';
+import type { Vec2 } from '@dots-war-sim/core';
 
 const FILL_COLOR = 0x4488ff;
 const FILL_ALPHA = 0.15;

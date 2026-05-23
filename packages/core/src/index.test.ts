@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { VERSION } from './index.js';
 
-describe('@war-of-dots/core', () => {
+describe('@dots-war-sim/core', () => {
   it('exposes a VERSION string', () => {
     expect(typeof VERSION).toBe('string');
   });

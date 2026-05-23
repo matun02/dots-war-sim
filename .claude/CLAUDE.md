@@ -70,9 +70,9 @@
 ## 3. ディレクトリ構成（pnpm workspaces）
 
 ```
-war-of-dots/
+dots-war-sim/
 ├── apps/
-│   ├── web/                 # @war-of-dots/web — Svelte 5 + Vite + PixiJS（クライアント）
+│   ├── web/                 # @dots-war-sim/web — Svelte 5 + Vite + PixiJS（クライアント）
 │   │   ├── src/
 │   │   │   ├── ui/          # Svelte コンポーネント
 │   │   │   ├── game/
@@ -84,10 +84,10 @@ war-of-dots/
 │   │   │   ├── stores/      # Zustand (UI only)
 │   │   │   └── main.ts
 │   │   └── public/assets/
-│   └── server/              # @war-of-dots/server — Cloudflare Workers（Phase3 以降）
+│   └── server/              # @dots-war-sim/server — Cloudflare Workers（Phase3 以降）
 │       └── src/
 ├── packages/
-│   ├── core/                # @war-of-dots/core — ★最重要：sim・型・共通ロジック
+│   ├── core/                # @dots-war-sim/core — ★最重要：sim・型・共通ロジック
 │   │   ├── src/
 │   │   │   ├── sim/         # 純関数シミュレーション
 │   │   │   ├── pathfinding/
@@ -95,8 +95,8 @@ war-of-dots/
 │   │   │   ├── replay.ts
 │   │   │   └── types.ts
 │   │   └── package.json
-│   ├── maps/                # @war-of-dots/maps — マップ JSON + バリデーション
-│   └── assets/              # @war-of-dots/assets — 共通アセット定義
+│   ├── maps/                # @dots-war-sim/maps — マップ JSON + バリデーション
+│   └── assets/              # @dots-war-sim/assets — 共通アセット定義
 ├── tests/
 │   └── e2e/                 # Playwright
 ├── .github/workflows/
@@ -111,8 +111,8 @@ war-of-dots/
 └── README.md
 ```
 
-★MUST: 全パッケージは `@war-of-dots/<name>` スコープを使う。
-`pnpm --filter` 指定時は **`pnpm --filter @war-of-dots/web dev`** のようにフルネームを指定する（短縮の `web` は package.json の name と一致しないため動かない）。
+★MUST: 全パッケージは `@dots-war-sim/<name>` スコープを使う。
+`pnpm --filter` 指定時は **`pnpm --filter @dots-war-sim/web dev`** のようにフルネームを指定する（短縮の `web` は package.json の name と一致しないため動かない）。
 
 ### 3.1 依存方向（★MUST）
 
@@ -302,9 +302,9 @@ test(sim): add deterministic replay equivalence test
 
 | 日付 | バージョン | 変更 |
 |---|---|---|
+| 2026-05-23 | 1.0.15 | P1-T15 完了（Cloudflare Pages デプロイ）。`vite.config.ts` manualChunks + `_redirects` SPA フォールバック。公開 URL: dots-war-sim.pages.dev。M3完了、Phase 1 全完了 |
 | 2026-05-22 | 1.0.14 | P1-T14 完了（リプレイ録画/再生）。`replay.ts` + `hash.ts` + recorder/player/storage + UI統合。テスト 12 件追加（合計 132 件） |
 | 2026-05-22 | 1.0.13 | P1-T13 完了（AI v0 ルールベース）。`controller.ts` + App.svelte統合。テスト 8 件追加（合計 120 件）。M2完了 |
-| 2026-05-22 | 1.0.12 | P1-T12 完了（勝敗判定 + 結果画面）。テスト 8 件追加（合計 112 件） |
 
 ---
 

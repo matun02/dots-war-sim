@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { GameResult, PlayerId } from '@war-of-dots/core';
+  import type { GameResult, PlayerId } from '@dots-war-sim/core';
 
   interface Props {
     result: GameResult;

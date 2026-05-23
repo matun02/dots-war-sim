@@ -1,5 +1,5 @@
 /**
- * @war-of-dots/core
+ * @dots-war-sim/core
  *
  * Pure-TypeScript simulation, pathfinding, RNG, and shared types
  * for the War of Dots clone. Must remain free of DOM / Node / framework

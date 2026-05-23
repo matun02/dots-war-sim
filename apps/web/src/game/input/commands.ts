@@ -1,4 +1,4 @@
-import type { Command, PlayerId, EntityId, Vec2 } from '@war-of-dots/core';
+import type { Command, PlayerId, EntityId, Vec2 } from '@dots-war-sim/core';
 
 export interface InputCollector {
   selectedIds: EntityId[];

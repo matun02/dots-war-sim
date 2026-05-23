@@ -1,5 +1,5 @@
 import { type Application, Container, Graphics } from 'pixi.js';
-import type { MapDef } from '@war-of-dots/core';
+import type { MapDef } from '@dots-war-sim/core';
 
 const TERRAIN_COLORS: Record<number, number> = {
   0: 0x1e2d1e, // plain

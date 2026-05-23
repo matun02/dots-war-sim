@@ -24,6 +24,7 @@
 | 2026-05-22 | 1.0.12 | P1-T12 完了（勝敗判定 + 結果画面）。`evaluate-game-end.ts` — domination/annihilation/timeout/draw判定。`GAME_TIME_LIMIT_TICKS=36000`。`Title.svelte` + `ResultDialog.svelte` + App.svelte画面遷移。テスト 8 件追加（合計 112 件） |
 | 2026-05-22 | 1.0.13 | P1-T13 完了（AI v0 ルールベース）。`apps/web/src/game/ai/controller.ts` — AIController factory + 難易度設定 + ターゲットスコアリング + 防衛ロジック。App.svelte統合（別Rngインスタンス）。テスト 8 件追加（合計 120 件）。M2完了 |
 | 2026-05-22 | 1.0.14 | P1-T14 完了（リプレイ録画/再生）。`core/src/replay.ts` — Replay型 + REPLAY_VERSION。`core/sim/hash.ts` — 決定論的状態ハッシュ。`apps/web/src/game/replay/` — recorder + player + storage(idb-keyval)。ResultDialog + App.svelte UI統合。テスト 12 件追加（合計 132 件） |
+| 2026-05-22 | 1.0.12 | P1-T12 完了（勝敗判定 + 結果画面）。テスト 8 件追加（合計 112 件） |
 
 ---
 

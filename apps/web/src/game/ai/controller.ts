@@ -6,8 +6,8 @@ import type {
   Unit,
   Vec2,
   EntityId,
-} from '@war-of-dots/core';
-import type { Rng } from '@war-of-dots/core';
+} from '@dots-war-sim/core';
+import type { Rng } from '@dots-war-sim/core';
 
 export type AIDifficulty = 'easy' | 'normal' | 'hard';
 

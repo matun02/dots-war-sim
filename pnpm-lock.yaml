@@ -35,10 +35,10 @@ importers:
 
   apps/web:
     dependencies:
-      '@war-of-dots/core':
+      '@dots-war-sim/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@war-of-dots/maps':
+      '@dots-war-sim/maps':
         specifier: workspace:^
         version: link:../../packages/maps
       idb-keyval:
@@ -90,7 +90,7 @@ importers:
 
   packages/maps:
     dependencies:
-      '@war-of-dots/core':
+      '@dots-war-sim/core':
         specifier: workspace:*
         version: link:../core
       valibot:

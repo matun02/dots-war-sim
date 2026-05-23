@@ -1,7 +1,7 @@
 import { get, set, del, keys, type UseStore, createStore } from 'idb-keyval';
-import type { Replay } from '@war-of-dots/core';
+import type { Replay } from '@dots-war-sim/core';
 
-const store: UseStore = createStore('war-of-dots-replays', 'replays');
+const store: UseStore = createStore('dots-war-sim-replays', 'replays');
 
 export async function saveReplay(replay: Replay): Promise<void> {
   await set(replay.createdAt, replay, store);
