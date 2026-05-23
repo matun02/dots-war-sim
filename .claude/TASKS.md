@@ -40,6 +40,7 @@
 | P2-T1 | Heavy ユニット | 2026-05-23 | `a6e6beb` | 12 件 (累計 144) |
 | P2-T2 | 影響マップ | 2026-05-23 | `ff1390f` | 9 件 (累計 153) |
 | P2-T3 | AI v1（影響マップベース） | 2026-05-23 | `dc97deb` | 5 件 (累計 158) |
+| P2-T4 | 前線描画 | 2026-05-24 | `41c8257` | 8 件 (累計 166) |
 
 詳細（作業内容・学び・指示文サンプル）: `archive/completed-tasks.md`
 
@@ -92,25 +93,19 @@ P2-T6 ────────────────────────�
 
 ---
 
-### ★次タスク: P2-T4 前線描画
+### ★次タスク: P2-T5 マップ追加（計 5 枚）
 
-**入力**: DESIGN.md §8.3。**依存: P2-T2（完了済み）**
+**入力**: future-phases.md P2-T5。**依存: なし**
 
-**作業内容**: `apps/web/src/game/render/frontline.ts` 新規作成。マーチングスクエアで `infl[A] - infl[B]` の 0 等高線を生成 → PixiJS Graphics で半透明線描画。
+**作業内容**: `packages/maps/src/data/` に 4 マップ JSON 追加（中央橋、4 隅都市、海峡、回廊）。`index.ts` 更新。`Title.svelte` にマップ選択 UI 追加。`App.svelte` で選択マップを `loadMap` に渡す。
 
-**ディレクトリ**: `apps/web`（1 ディレクトリ）
+**ディレクトリ**: `packages/maps` + `apps/web`（2 ディレクトリ）
 
 **見積**: 2h
 
 ---
 
 ### 残タスク一覧
-
-#### P2-T4: 前線描画
-- **入力**: DESIGN.md §8.3。**依存: P2-T2**
-- **作業**: `apps/web/src/game/render/frontline.ts` 新規作成。マーチングスクエアで `infl[A] - infl[B]` の 0 等高線を生成 → PixiJS Graphics で半透明線描画。
-- **ディレクトリ**: `apps/web`（1 ディレクトリ）
-- **見積**: 2h
 
 #### P2-T5: マップ追加（計 5 枚）
 - **入力**: future-phases.md P2-T5
