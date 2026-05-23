@@ -333,3 +333,33 @@
 - **見積**: 半日
 - **実績**: 15 分
 - **学び**: Cloudflare Pages の本番 URL (`*.pages.dev`) は `--branch=main` でデプロイしないと反映されない。manualChunks で PixiJS を分離するとメインチャンクが 289 KB → 60 KB に縮小。バンドル合計 gz ~157 KB で 500 KB 目標を大幅にクリア。
+
+---
+
+## P2-T1: Heavy ユニット ✅ 完了 (2026-05-23, commit `a6e6beb`)
+
+- **目的**: heavy ユニット種別を完全に動作させる。既存の型・定数・A* 地形コストは実装済みのため、補給コスト差分・生産切替コマンド・UI・描画の差分実装が中心。
+- **作業内容**:
+  1. `constants.ts` — `UNIT_STATS` に `supplyCost` フィールド追加 (light=1, heavy=2)
+  2. `types.ts` — `Command` union に `set-production` 型追加
+  3. `apply-inputs.ts` — `set-production` case ハンドラ追加（自プレイヤー都市のみ変更可）
+  4. `produce-units.ts` — 補給チェックを `supplyUsed + supplyCost > SUPPLY_MAX` に変更、加算も `+= supplyCost`
+  5. `remove-dead.ts` — 補給解放を `UNIT_STATS[unit.kind].supplyCost` で差分対応
+  6. `commands.ts` — `setProductionCommand()` と `InputCollector` 型拡張
+  7. `units.ts` — kind ごとのテクスチャ生成、heavy は radius=cellPx*0.35 で視覚的区別
+  8. `App.svelte` — onMouseUp でドラッグ距離 < 0.5 セルかつ自都市セル上なら生産切替トグル
+- **成果物**: 上記 8 ファイル変更 + テスト 4 ファイル変更
+- **受け入れ基準**:
+  - [x] heavy ユニットが都市から生産される（`produceIntervalTicks: 180`）
+  - [x] heavy は補給スロット 2 消費（supplyUsed + 2 > 5 で生産停止）
+  - [x] heavy は平地・都市のみ通行可（A* 既存実装で対応済み）
+  - [x] heavy の戦闘: attack=3, hp=5, attackIntervalTicks=30
+  - [x] `set-production` コマンドで自都市の生産種別が切り替わる
+  - [x] UI: 自都市クリックで生産種別トグルが機能する
+  - [x] heavy ユニットが light と視覚的に区別できる（サイズ差）
+  - [x] 死亡時に正しい補給コスト分（light=1, heavy=2）が解放される
+  - [x] 決定論テスト: 既存 tick テスト全 green
+  - [x] typecheck / lint / test 全 green（合計 144 件）
+- **見積**: 3h
+- **実績**: 40 分
+- **学び**: 既存コードが kind パラメータをほぼ全箇所で渡していたため、差分実装は supplyCost 追加と UI 部分のみで済んだ。DPR=0.75 環境では Chrome MCP のスクリーンショット座標と CSS ピクセル座標にスケーリング差が出る。ブラウザ検証では JavaScript で直接ゲーム状態を取得するのが最も確実。

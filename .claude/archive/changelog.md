@@ -24,6 +24,8 @@
 | 2026-05-22 | 1.0.12 | P1-T12 完了（勝敗判定 + 結果画面）。`evaluate-game-end.ts` — domination/annihilation/timeout/draw判定。`GAME_TIME_LIMIT_TICKS=36000`。`Title.svelte` + `ResultDialog.svelte` + App.svelte画面遷移。テスト 8 件追加（合計 112 件） |
 | 2026-05-22 | 1.0.13 | P1-T13 完了（AI v0 ルールベース）。`apps/web/src/game/ai/controller.ts` — AIController factory + 難易度設定 + ターゲットスコアリング + 防衛ロジック。App.svelte統合（別Rngインスタンス）。テスト 8 件追加（合計 120 件）。M2完了 |
 | 2026-05-22 | 1.0.14 | P1-T14 完了（リプレイ録画/再生）。`core/src/replay.ts` — Replay型 + REPLAY_VERSION。`core/sim/hash.ts` — 決定論的状態ハッシュ。`apps/web/src/game/replay/` — recorder + player + storage(idb-keyval)。ResultDialog + App.svelte UI統合。テスト 12 件追加（合計 132 件） |
+| 2026-05-23 | 1.0.15 | P1-T15 完了（Cloudflare Pages デプロイ）。`vite.config.ts` manualChunks + `_redirects` SPA フォールバック。公開 URL: dots-war-sim.pages.dev。M3完了、Phase 1 全完了 |
+| 2026-05-23 | 1.0.16 | P2-T1 完了（Heavy ユニット）。`constants.ts` supplyCost追加、`types.ts` set-production Command、`produce-units.ts`/`remove-dead.ts` 補給コスト差分、`commands.ts` setProductionCommand、`units.ts` heavy描画（radius 0.35）、`App.svelte` 都市クリックトグル。テスト 12 件追加（合計 144 件） |
 
 ---
 
@@ -45,3 +47,4 @@
 | 2026-05-21 | 1.0.11 | P1-T11 完了マーク（commit `eb5ef21`）。戦闘・死亡処理・都市占領（spatial-hash + resolve-combat + remove-dead + update-city-capture）。新規テスト 23 件（合計 103 件）。M2 進行中 |
 | 2026-05-22 | 1.0.12 | P1-T12 完了マーク（commit `e5be5aa`）。勝敗判定 + 結果画面 + タイトル画面 + 画面遷移。新規テスト 8 件（合計 112 件）。M2 進行中 |
 | 2026-05-22 | 1.0.13 | P1-T13 完了マーク（commit `c617ac5`）。AI v0 ルールベース + App.svelte統合。新規テスト 8 件（合計 120 件）。M2 完了 |
+| 2026-05-23 | 1.0.16 | P2-T1 完了マーク（commit `a6e6beb`）。Heavy ユニット — supplyCost + set-production + 補給コスト差分 + 都市クリックトグル + heavy描画。新規テスト 12 件（合計 144 件）。M4 進行中 |

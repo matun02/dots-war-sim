@@ -302,9 +302,9 @@ test(sim): add deterministic replay equivalence test
 
 | 日付 | バージョン | 変更 |
 |---|---|---|
+| 2026-05-23 | 1.0.16 | P2-T1 完了（Heavy ユニット）。`constants.ts` supplyCost追加、`types.ts` set-production Command、`produce-units.ts`/`remove-dead.ts` 補給コスト差分、`commands.ts` setProductionCommand、`units.ts` heavy描画（radius 0.35）、`App.svelte` 都市クリックトグル。テスト 12 件追加（合計 144 件） |
 | 2026-05-23 | 1.0.15 | P1-T15 完了（Cloudflare Pages デプロイ）。`vite.config.ts` manualChunks + `_redirects` SPA フォールバック。公開 URL: dots-war-sim.pages.dev。M3完了、Phase 1 全完了 |
 | 2026-05-22 | 1.0.14 | P1-T14 完了（リプレイ録画/再生）。`replay.ts` + `hash.ts` + recorder/player/storage + UI統合。テスト 12 件追加（合計 132 件） |
-| 2026-05-22 | 1.0.13 | P1-T13 完了（AI v0 ルールベース）。`controller.ts` + App.svelte統合。テスト 8 件追加（合計 120 件）。M2完了 |
 
 ---
 
