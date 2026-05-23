@@ -135,90 +135,12 @@ Input ──► Commands ──► InputFrame ──► tick() ──► GameSta
 
 ## 3. 主要データ構造
 
-### 3.1 型定義（`packages/core/src/sim/types.ts`）
+### 3.1 型定義
 
-```ts
-// Branded ID
-type Brand<T, B> = T & { __brand: B };
-export type EntityId = Brand<number, "EntityId">;
-export type CityId   = Brand<number, "CityId">;
-export type PlayerId = Brand<number, "PlayerId">;
+実装: `packages/core/src/sim/types.ts` を参照（truth source）。
 
-export type Vec2 = { x: number; y: number };
-
-export type Terrain = "plain" | "mountain" | "forest" | "water";
-export type UnitKind = "light" | "heavy";
-
-// プレイヤー
-export interface Player {
-  id: PlayerId;
-  name: string;
-  color: number;   // 0xRRGGBB
-  alive: boolean;
-}
-
-// 都市
-export interface City {
-  id: CityId;
-  pos: Vec2;
-  owner: PlayerId | null;          // null = 中立
-  production: UnitKind;
-  produceCooldownTicks: number;    // 残 tick
-  captureProgressTicks: number;    // 占領進行度
-  capturingPlayer: PlayerId | null;
-  supplyUsed: number;              // 現在の補給枠使用数
-}
-
-// ユニット
-export interface Unit {
-  id: EntityId;
-  owner: PlayerId;
-  kind: UnitKind;
-  homeCity: CityId;                // 補給枠の親都市
-  pos: Vec2;                       // 浮動小数だが整数演算で更新
-  hp: number;
-  path: Vec2[] | null;             // 残経路
-  goal: Vec2 | null;
-  attackCooldownTicks: number;
-}
-
-// マップ
-export interface MapDef {
-  id: string;
-  width: number;
-  height: number;
-  terrain: Uint8Array;             // length = width * height
-  cities: Readonly<Pick<City, "id" | "pos" | "production">>[];
-  spawns: { player: PlayerId; cityId: CityId }[];
-}
-
-// ゲーム状態（決定論的：シリアライズ可能であること）
-export interface GameState {
-  tick: number;
-  seed: number;
-  map: MapDef;
-  players: Player[];
-  cities: City[];
-  units: Unit[];
-  nextEntityId: number;
-  result: GameResult | null;
-}
-
-export type GameResult =
-  | { type: "victory"; winner: PlayerId; reason: "domination" | "annihilation" | "timeout" }
-  | { type: "draw" };
-
-// 入力
-export type Command =
-  | { type: "select";  player: PlayerId; ids: EntityId[] }
-  | { type: "move";    player: PlayerId; ids: EntityId[]; to: Vec2 }
-  | { type: "line";    player: PlayerId; ids: EntityId[]; from: Vec2; to: Vec2 };
-
-export interface InputFrame {
-  tick: number;
-  commands: Command[];
-}
-```
+主要な型: `GameState`, `Unit`, `City`, `Player`, `MapDef`, `Command`, `InputFrame`, `GameResult`
+Branded ID: `EntityId`, `CityId`, `PlayerId`（型レベルのみ、ランタイムコスト 0）
 
 ### 3.2 設計上の注意
 - **`GameState` 全体は JSON シリアライズ可能であること**（リプレイ・送信のため）
@@ -236,32 +158,11 @@ export interface InputFrame {
 
 ### 4.2 ループ実装方針
 
-```ts
-const TICK_DT_MS = 1000 / 30;
-const MAX_FRAME_DT = 250;  // 250ms 超は捨てる（タブ復帰時の暴発防止）
+実装: `apps/web/src/game/loop.ts` を参照（truth source）。
 
-let acc = 0;
-let last = performance.now();
-let prev: GameState = structuredClone(initialState);
-let cur:  GameState = initialState;
-
-function frame(now: number) {
-  const dt = Math.min(now - last, MAX_FRAME_DT);
-  last = now;
-  acc += dt;
-
-  while (acc >= TICK_DT_MS) {
-    prev = cur;
-    const inputs = collectInputs();  // ローカル(or net)
-    cur = tick(cur, inputs, rng);    // 純関数
-    acc -= TICK_DT_MS;
-  }
-
-  render(prev, cur, acc / TICK_DT_MS);
-  requestAnimationFrame(frame);
-}
-requestAnimationFrame(frame);
-```
+- accumulator パターン: `TICK_DT_MS = 1000/30`, `MAX_FRAME_DT = 250ms`
+- tick ごとに `prev = cur; cur = tick(cur, inputs, rng)` で更新
+- render は `prev`/`cur` と `alpha = acc / TICK_DT_MS` で補間描画
 
 ### 4.3 補間レンダ
 - `Unit.pos` を `prev` と `cur` で線形補間して描画
@@ -274,40 +175,17 @@ requestAnimationFrame(frame);
 
 ### 5.1 1tick の処理順
 
-```ts
-function tick(state: GameState, inputs: readonly InputFrame[], rng: Rng): GameState {
-  let s = clone(state);
-  s.tick++;
+実装: `packages/core/src/sim/tick.ts` を参照（truth source）。
 
-  // 1. 入力反映（選択・移動命令を Unit に書き込む）
-  applyInputs(s, inputs);
-
-  // 2. パス更新（goal が変わっていれば再計算）
-  recomputePathsIfDirty(s);
-
-  // 3. ユニット移動
-  moveUnits(s);
-
-  // 4. 戦闘（最寄り敵にダメージ）
-  resolveCombat(s);
-
-  // 5. 死亡処理（HP<=0 を除去、補給枠を解放）
-  removeDeadUnits(s);
-
-  // 6. 都市占領進行
-  updateCityCapture(s);
-
-  // 7. 都市生産
-  produceUnits(s);
-
-  // 8. 勝敗判定
-  evaluateGameEnd(s);
-
-  return s;
-}
-```
-
-各ステップは別ファイル `core/sim/steps/<name>.ts` に分けて、tick.ts は orchestrator にする。
+処理順序（`core/sim/steps/<name>.ts` に分離）:
+1. `applyInputs` — 入力反映（Unit.goal 更新）
+2. `recomputePaths` — A* 再計算（goal 変更時のみ、1tick 最大 8 件）
+3. `moveUnits` — path 追従移動
+4. `resolveCombat` — 最寄り敵にダメージ
+5. `removeDead` — HP<=0 除去 + 補給枠解放
+6. `updateCityCapture` — 都市占領進行
+7. `produceUnits` — 都市生産
+8. `evaluateGameEnd` — 勝敗判定
 
 ### 5.2 各ステップの責務
 
@@ -328,26 +206,8 @@ function tick(state: GameState, inputs: readonly InputFrame[], rng: Rng): GameSt
 
 ### 6.1 アルゴリズム
 - **mulberry32**（高品質・短実装・整数演算可）
-
-```ts
-// packages/core/src/rng.ts
-export class Rng {
-  private a: number;
-  constructor(seed: number) { this.a = seed >>> 0; }
-  next(): number {
-    this.a = (this.a + 0x6D2B79F5) >>> 0;
-    let t = this.a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  }
-  int(maxExclusive: number): number {
-    return Math.floor(this.next() * maxExclusive);
-  }
-  state(): number { return this.a; }
-  static restore(s: number): Rng { const r = new Rng(0); (r as any).a = s >>> 0; return r; }
-}
-```
+- 実装: `packages/core/src/rng.ts` を参照（truth source）
+- API: `Rng(seed)`, `next(): [0,1)`, `int(max)`, `state()`, `Rng.restore(s)`
 
 ### 6.2 利用ルール
 - ★MUST: sim 内で乱数が必要な箇所は **必ず** `Rng` 経由
@@ -370,18 +230,10 @@ export class Rng {
 
 ### 7.2 A* 実装方針
 
-```ts
-// packages/core/src/pathfinding/astar.ts
-export function findPath(
-  map: MapDef,
-  start: Vec2,
-  goal: Vec2,
-  kind: UnitKind,
-): Vec2[] | null;
-```
+実装: `packages/core/src/pathfinding/astar.ts` を参照（truth source）。
 
-- グリッドは **4方向（または 8 方向 + 対角コスト √2）**
-- ヒューリスティック: マンハッタン（4方向）or オクタイル（8方向）
+- **8 方向 + 対角コスト（整数: 10/14）**
+- ヒューリスティック: オクタイル
 - 通行コスト:
   - light: plain=1, forest=2, mountain=3, water=∞, city=1
   - heavy: plain=1, forest=∞, mountain=∞, water=∞, city=1
