@@ -363,3 +363,27 @@
 - **見積**: 3h
 - **実績**: 40 分
 - **学び**: 既存コードが kind パラメータをほぼ全箇所で渡していたため、差分実装は supplyCost 追加と UI 部分のみで済んだ。DPR=0.75 環境では Chrome MCP のスクリーンショット座標と CSS ピクセル座標にスケーリング差が出る。ブラウザ検証では JavaScript で直接ゲーム状態を取得するのが最も確実。
+
+---
+
+## P2-T2: 影響マップ ✅ 完了 (2026-05-23, commit `ff1390f`)
+
+- **目的**: AI（P2-T3）と前線描画（P2-T4）の基盤となる影響マップ計算モジュールを実装する。
+- **作業内容**:
+  1. `influence-map.ts` — `computeInfluenceMap` 純関数（Int16Array×陣営数、ユニット重み加算→3回ガウシアン拡散）
+  2. `influence-map.ts` — `computeInfluenceDiff` 純関数（2陣営の差分計算）
+  3. `index.ts` — export 追加（`computeInfluenceMap`, `computeInfluenceDiff`, `InfluenceData` 型）
+- **成果物**: 新規 2 ファイル + index.ts 編集
+- **受け入れ基準**:
+  - [x] `computeInfluenceMap(state)` が `InfluenceData` を返す
+  - [x] `computeInfluenceDiff(data, pA, pB)` が差分 `Int16Array` を返す
+  - [x] ユニットなし → 全セル 0
+  - [x] light=100, heavy=200 の重み加算が正しい
+  - [x] 3 回ガウシアン拡散で周囲に値が広がる
+  - [x] 整数演算のみ（決定論維持）
+  - [x] 同一入力で同一出力（決定論テスト）
+  - [x] `packages/core/src/sim/index.ts` から export されている
+  - [x] typecheck / lint / test 全 green（合計 153 件）
+- **見積**: 2h
+- **実績**: 20 分
+- **学び**: `noUncheckedIndexedAccess: true` の環境では TypedArray のインデックスアクセスにも `!` が必要。Int16Array は代入時に自動的に整数へ切り捨てるが、`Math.floor` も明示して決定論を担保。拡散ループでは `next` バッファのコピーで `new Int16Array(next)` を使い、元配列への参照を切る必要がある。
