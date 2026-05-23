@@ -7,6 +7,11 @@ import type {
   Vec2,
   EntityId,
 } from '@dots-war-sim/core';
+import {
+  computeInfluenceMap,
+  computeInfluenceDiff,
+  type InfluenceData,
+} from '@dots-war-sim/core';
 import type { Rng } from '@dots-war-sim/core';
 
 export type AIDifficulty = 'easy' | 'normal' | 'hard';
@@ -25,6 +30,9 @@ const DIFFICULTY_CONFIG: Record<AIDifficulty, AIConfig> = {
 const DEFENSE_RADIUS = 15;
 const NEUTRAL_WEIGHT = 1.5;
 const ENEMY_WEIGHT = 1.0;
+const INFLUENCE_INTERVAL = 5;
+const ECONOMY_DISADVANTAGE_THRESHOLD = 0.4;
+const HEAVY_PRODUCTION_MIN_CITIES = 3;
 
 export interface AIController {
   update(state: GameState): Command[];
@@ -36,6 +44,23 @@ export function createAIController(
   rng: Rng,
 ): AIController {
   const config = DIFFICULTY_CONFIG[difficulty];
+  let cachedInfluence: InfluenceData | null = null;
+  let lastInfluenceTick = -Infinity;
+
+  function getInfluence(state: GameState): InfluenceData {
+    if (state.tick - lastInfluenceTick >= INFLUENCE_INTERVAL) {
+      cachedInfluence = computeInfluenceMap(state);
+      lastInfluenceTick = state.tick;
+    }
+    return cachedInfluence!;
+  }
+
+  function findEnemyId(state: GameState): PlayerId | null {
+    for (const p of state.players) {
+      if (p.id !== playerId && p.alive) return p.id;
+    }
+    return null;
+  }
 
   return {
     update(state: GameState): Command[] {
@@ -52,7 +77,45 @@ export function createAIController(
       available = handleDefense(state, playerId, available, commands);
       if (available.length === 0) return commands;
 
-      handleOffense(state, playerId, myUnits, available, config, rng, commands);
+      const enemyId = findEnemyId(state);
+      if (enemyId === null) {
+        handleOffense(state, playerId, myUnits, available, config, rng, commands);
+        return commands;
+      }
+
+      const influence = getInfluence(state);
+      const myCities = state.cities.filter((c) => c.owner === playerId);
+      const enemyCities = state.cities.filter((c) => c.owner === enemyId);
+      const economyRatio =
+        myCities.length + enemyCities.length > 0
+          ? myCities.length / (myCities.length + enemyCities.length)
+          : 0.5;
+
+      if (economyRatio < ECONOMY_DISADVANTAGE_THRESHOLD) {
+        handleEconomyExpansion(
+          state,
+          playerId,
+          myUnits,
+          available,
+          config,
+          rng,
+          commands,
+        );
+      } else {
+        handleFrontlinePush(
+          state,
+          playerId,
+          enemyId,
+          influence,
+          myUnits,
+          available,
+          config,
+          rng,
+          commands,
+        );
+      }
+
+      handleHeavyProduction(state, playerId, enemyId, influence, myCities, commands);
 
       return commands;
     },
@@ -112,22 +175,207 @@ function handleOffense(
   const bestTarget = targets[0];
   if (bestTarget === undefined) return;
 
-  const selectedIds: EntityId[] = [];
-  for (const u of idleUnits) {
-    if (rng.next() < config.selectionAccuracy) {
-      selectedIds.push(u.id);
-    }
-  }
-
+  const selectedIds = selectUnits(idleUnits, config, rng);
   if (selectedIds.length === 0) return;
 
-  selectedIds.sort((a, b) => a - b);
   commands.push({
     type: 'move',
     player: playerId,
     ids: selectedIds,
     to: bestTarget.pos,
   });
+}
+
+function handleEconomyExpansion(
+  state: GameState,
+  playerId: PlayerId,
+  myUnits: Unit[],
+  idleUnits: Unit[],
+  config: AIConfig,
+  rng: Rng,
+  commands: Command[],
+): void {
+  const avgPos = computeCenter(state, playerId, myUnits);
+  if (avgPos === null) return;
+
+  const neutralTargets = state.cities
+    .filter((c) => c.owner === null)
+    .map((c) => {
+      const dist = Math.hypot(c.pos.x - avgPos.x, c.pos.y - avgPos.y);
+      const score = dist > 0 ? (1 / dist) * NEUTRAL_WEIGHT : NEUTRAL_WEIGHT;
+      return { pos: c.pos, score, id: c.id };
+    })
+    .sort((a, b) => b.score - a.score || a.id - b.id);
+
+  const target = neutralTargets[0];
+  if (target === undefined) {
+    handleOffense(state, playerId, myUnits, idleUnits, config, rng, commands);
+    return;
+  }
+
+  const selectedIds = selectUnits(idleUnits, config, rng);
+  if (selectedIds.length === 0) return;
+
+  commands.push({
+    type: 'move',
+    player: playerId,
+    ids: selectedIds,
+    to: target.pos,
+  });
+}
+
+function handleFrontlinePush(
+  state: GameState,
+  playerId: PlayerId,
+  enemyId: PlayerId,
+  influence: InfluenceData,
+  myUnits: Unit[],
+  idleUnits: Unit[],
+  config: AIConfig,
+  rng: Rng,
+  commands: Command[],
+): void {
+  const diff = computeInfluenceDiff(influence, enemyId, playerId);
+  const { width, height } = influence;
+  const midX = width / 2;
+  const midY = height / 2;
+
+  let topSum = 0;
+  let bottomSum = 0;
+  let leftSum = 0;
+  let rightSum = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const val = diff[y * width + x]!;
+      if (val <= 0) continue;
+      if (y < midY) topSum += val;
+      if (y >= midY) bottomSum += val;
+      if (x < midX) leftSum += val;
+      if (x >= midX) rightSum += val;
+    }
+  }
+  const sectorSums = [topSum, bottomSum, leftSum, rightSum];
+
+  let maxSector = 0;
+  for (let i = 1; i < 4; i++) {
+    if (sectorSums[i]! > sectorSums[maxSector]!) maxSector = i;
+  }
+
+  const hasEnemyPressure = sectorSums[maxSector]! > 0;
+
+  if (hasEnemyPressure) {
+    const targetPos = getSectorTarget(state, playerId, maxSector, width, height);
+    const selectedIds = selectUnits(idleUnits, config, rng);
+    if (selectedIds.length === 0) return;
+
+    commands.push({
+      type: 'move',
+      player: playerId,
+      ids: selectedIds,
+      to: targetPos,
+    });
+  } else {
+    handleOffense(state, playerId, myUnits, idleUnits, config, rng, commands);
+  }
+}
+
+function getSectorTarget(
+  state: GameState,
+  playerId: PlayerId,
+  sector: number,
+  mapWidth: number,
+  mapHeight: number,
+): Vec2 {
+  const enemyCitiesInSector = state.cities.filter((c) => {
+    if (c.owner === playerId || c.owner === null) return false;
+    const midX = mapWidth / 2;
+    const midY = mapHeight / 2;
+    switch (sector) {
+      case 0:
+        return c.pos.y < midY;
+      case 1:
+        return c.pos.y >= midY;
+      case 2:
+        return c.pos.x < midX;
+      case 3:
+        return c.pos.x >= midX;
+      default:
+        return false;
+    }
+  });
+
+  if (enemyCitiesInSector.length > 0) {
+    enemyCitiesInSector.sort((a, b) => a.id - b.id);
+    return enemyCitiesInSector[0]!.pos;
+  }
+
+  const midX = mapWidth / 2;
+  const midY = mapHeight / 2;
+  switch (sector) {
+    case 0:
+      return { x: midX, y: Math.floor(midY * 0.5) };
+    case 1:
+      return { x: midX, y: Math.floor(midY * 1.5) };
+    case 2:
+      return { x: Math.floor(midX * 0.5), y: midY };
+    case 3:
+      return { x: Math.floor(midX * 1.5), y: midY };
+    default:
+      return { x: midX, y: midY };
+  }
+}
+
+function handleHeavyProduction(
+  state: GameState,
+  playerId: PlayerId,
+  enemyId: PlayerId,
+  influence: InfluenceData,
+  myCities: City[],
+  commands: Command[],
+): void {
+  if (myCities.length < HEAVY_PRODUCTION_MIN_CITIES) {
+    for (const city of myCities) {
+      if (city.production === 'heavy') {
+        commands.push({
+          type: 'set-production',
+          player: playerId,
+          cityId: city.id,
+          production: 'light',
+        });
+      }
+    }
+    return;
+  }
+
+  const diff = computeInfluenceDiff(influence, enemyId, playerId);
+  let enemyPressure = 0;
+  for (let i = 0; i < diff.length; i++) {
+    if (diff[i]! > 0) enemyPressure += diff[i]!;
+  }
+  const frontlineStable = enemyPressure === 0;
+
+  const targetProduction = frontlineStable ? 'heavy' : 'light';
+  for (const city of myCities) {
+    if (city.production !== targetProduction) {
+      commands.push({
+        type: 'set-production',
+        player: playerId,
+        cityId: city.id,
+        production: targetProduction,
+      });
+    }
+  }
+}
+
+function selectUnits(idleUnits: Unit[], config: AIConfig, rng: Rng): EntityId[] {
+  const selectedIds: EntityId[] = [];
+  for (const u of idleUnits) {
+    if (rng.next() < config.selectionAccuracy) {
+      selectedIds.push(u.id);
+    }
+  }
+  selectedIds.sort((a, b) => a - b);
+  return selectedIds;
 }
 
 function computeCenter(

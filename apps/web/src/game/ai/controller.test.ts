@@ -226,4 +226,120 @@ describe('AIController', () => {
 
     expect(cmds1).toEqual(cmds2);
   });
+
+  it('pushes units toward sector with enemy pressure', () => {
+    const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
+    const enemyUnits = Array.from({ length: 10 }, (_, i) =>
+      makeUnit(50 + i, HUMAN_PLAYER, 50 + i, 5),
+    );
+    const state = makeState(0, [
+      makeCity(0, 10, 18, AI_PLAYER),
+      makeCity(1, 50, 5, HUMAN_PLAYER),
+    ], [
+      makeUnit(0, AI_PLAYER, 10, 18),
+      makeUnit(1, AI_PLAYER, 12, 18),
+      makeUnit(2, AI_PLAYER, 14, 18),
+      ...enemyUnits,
+    ]);
+
+    const cmds = ai.update(state);
+
+    const moveCmd = cmds.find((c) => c.type === 'move');
+    expect(moveCmd).toBeDefined();
+    if (moveCmd && moveCmd.type === 'move') {
+      expect(moveCmd.to.y).toBeLessThan(18);
+    }
+  });
+
+  it('prioritizes neutral cities when economy is disadvantaged', () => {
+    const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
+    const state = makeState(0, [
+      makeCity(0, 10, 18, AI_PLAYER),
+      makeCity(1, 50, 5, HUMAN_PLAYER),
+      makeCity(2, 50, 30, HUMAN_PLAYER),
+      makeCity(3, 55, 18, HUMAN_PLAYER),
+      makeCity(4, 30, 18, null),
+    ], [
+      makeUnit(0, AI_PLAYER, 10, 18),
+      makeUnit(1, AI_PLAYER, 12, 18),
+    ]);
+
+    const cmds = ai.update(state);
+
+    const moveCmd = cmds.find((c) => c.type === 'move');
+    expect(moveCmd).toBeDefined();
+    if (moveCmd && moveCmd.type === 'move') {
+      expect(moveCmd.to).toEqual({ x: 30, y: 18 });
+    }
+  });
+
+  it('issues set-production command when frontline is stable and cities >= 3', () => {
+    const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
+    const state = makeState(0, [
+      makeCity(0, 10, 18, AI_PLAYER),
+      makeCity(1, 15, 18, AI_PLAYER),
+      makeCity(2, 20, 18, AI_PLAYER),
+      makeCity(3, 55, 18, HUMAN_PLAYER),
+    ], [
+      makeUnit(0, AI_PLAYER, 10, 18),
+    ]);
+
+    const cmds = ai.update(state);
+
+    const prodCmds = cmds.filter((c) => c.type === 'set-production');
+    expect(prodCmds.length).toBeGreaterThan(0);
+    for (const cmd of prodCmds) {
+      if (cmd.type === 'set-production') {
+        expect(cmd.production).toBe('heavy');
+      }
+    }
+  });
+
+  it('defense takes priority over influence-map strategy', () => {
+    const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
+    const enemyUnits = Array.from({ length: 5 }, (_, i) =>
+      makeUnit(50 + i, HUMAN_PLAYER, 50, 5 + i),
+    );
+    const state = makeState(0, [
+      makeCity(0, 10, 18, AI_PLAYER, 10),
+      makeCity(1, 50, 5, HUMAN_PLAYER),
+    ], [
+      makeUnit(0, AI_PLAYER, 12, 18),
+      makeUnit(1, AI_PLAYER, 14, 18),
+      ...enemyUnits,
+    ]);
+
+    const cmds = ai.update(state);
+
+    const defenseCmd = cmds.find(
+      (c) => c.type === 'move' && c.to.x === 10 && c.to.y === 18,
+    );
+    expect(defenseCmd).toBeDefined();
+  });
+
+  it('v1 is deterministic: same state + same seed produces same commands', () => {
+    const enemyUnits = Array.from({ length: 5 }, (_, i) =>
+      makeUnit(50 + i, HUMAN_PLAYER, 50, 5 + i),
+    );
+    const state = makeState(0, [
+      makeCity(0, 10, 18, AI_PLAYER),
+      makeCity(1, 15, 18, AI_PLAYER),
+      makeCity(2, 20, 18, AI_PLAYER),
+      makeCity(3, 50, 5, HUMAN_PLAYER),
+    ], [
+      makeUnit(0, AI_PLAYER, 10, 18),
+      makeUnit(1, AI_PLAYER, 12, 18),
+      makeUnit(2, AI_PLAYER, 14, 18),
+      ...enemyUnits,
+    ]);
+
+    const ai1 = createAIController(AI_PLAYER, 'normal', new Rng(99));
+    const cmds1 = ai1.update(state);
+
+    const ai2 = createAIController(AI_PLAYER, 'normal', new Rng(99));
+    const cmds2 = ai2.update(state);
+
+    expect(cmds1).toEqual(cmds2);
+    expect(cmds1.length).toBeGreaterThan(0);
+  });
 });
