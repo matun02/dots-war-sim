@@ -387,3 +387,25 @@
 - **見積**: 2h
 - **実績**: 20 分
 - **学び**: `noUncheckedIndexedAccess: true` の環境では TypedArray のインデックスアクセスにも `!` が必要。Int16Array は代入時に自動的に整数へ切り捨てるが、`Math.floor` も明示して決定論を担保。拡散ループでは `next` バッファのコピーで `new Int16Array(next)` を使い、元配列への参照を切る必要がある。
+
+## P2-T3: AI v1（影響マップベース） ✅ 完了 (2026-05-23, commit `dc97deb`)
+
+- **目的**: 影響マップを使って戦略的に行動する AI v1 を実装。v0 のルールベースを拡張し、前線圧力検出・押し返し・経済/軍事バランス評価を追加。
+- **作業内容**:
+  1. `controller.ts` — v1 ロジック追加: `handleFrontlinePush`（4セクター圧力検出→敵都市方向ユニット投入）、`handleEconomyExpansion`（ratio<0.4で中立都市優先）、`handleHeavyProduction`（都市3+&前線安定でheavy切替）
+  2. `controller.ts` — 影響マップ5tickキャッシュ（`getInfluence`）、`selectUnits` ヘルパー抽出
+  3. `controller.test.ts` — v1 用テスト 5 件追加（前線押し返し、経済判断、生産切替、防衛優先、決定論）
+- **成果物**: 既存 2 ファイル編集（controller.ts +264行, controller.test.ts +116行）
+- **受け入れ基準**:
+  - [x] AI v1 が影響マップを使って前線を分析する
+  - [x] 押し込まれたセクターにユニットを投入する
+  - [x] 都市数が不利な場合、中立都市を優先的に狙う
+  - [x] 前線安定時に heavy 生産へ切替（set-production コマンド発行）
+  - [x] v0 の防衛ロジック（脅威都市への呼び戻し）が維持される
+  - [x] 影響マップは 5tick ごとにキャッシュ再計算
+  - [x] 全難易度で動作する
+  - [x] 決定論テスト通過
+  - [x] typecheck / lint / test 全 green（合計 158 件）
+- **見積**: 3h
+- **実績**: 1.5h
+- **学び**: Chrome拡張のスクリーンショットではWebGL Canvas内容が映らない。ウェブテストは `globalThis` にデバッグフックを仕込んで JS から状態を検証する方式が有効。本家 War of Dots には中立都市が存在しないため、economy expansion モードは将来的に不要になる可能性がある。

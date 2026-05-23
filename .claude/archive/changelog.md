@@ -27,6 +27,7 @@
 | 2026-05-23 | 1.0.15 | P1-T15 完了（Cloudflare Pages デプロイ）。`vite.config.ts` manualChunks + `_redirects` SPA フォールバック。公開 URL: dots-war-sim.pages.dev。M3完了、Phase 1 全完了 |
 | 2026-05-23 | 1.0.16 | P2-T1 完了（Heavy ユニット）。`constants.ts` supplyCost追加、`types.ts` set-production Command、`produce-units.ts`/`remove-dead.ts` 補給コスト差分、`commands.ts` setProductionCommand、`units.ts` heavy描画（radius 0.35）、`App.svelte` 都市クリックトグル。テスト 12 件追加（合計 144 件） |
 | 2026-05-23 | 1.0.17 | P2-T2 完了（影響マップ）。`influence-map.ts` 新規作成 — computeInfluenceMap + computeInfluenceDiff 純関数。Int16Array、整数演算のみ、3回ガウシアン拡散。テスト 9 件追加（合計 153 件） |
+| 2026-05-23 | 1.0.18 | P2-T3 完了（AI v1 影響マップベース）。`controller.ts` v1拡張 — 前線圧力検出(4セクター)・経済評価(ratio<0.4で中立優先)・heavy生産切替(都市3+&安定時)・影響マップ5tickキャッシュ。テスト 5 件追加（合計 158 件） |
 
 ---
 
@@ -50,3 +51,4 @@
 | 2026-05-22 | 1.0.13 | P1-T13 完了マーク（commit `c617ac5`）。AI v0 ルールベース + App.svelte統合。新規テスト 8 件（合計 120 件）。M2 完了 |
 | 2026-05-23 | 1.0.16 | P2-T1 完了マーク（commit `a6e6beb`）。Heavy ユニット — supplyCost + set-production + 補給コスト差分 + 都市クリックトグル + heavy描画。新規テスト 12 件（合計 144 件）。M4 進行中 |
 | 2026-05-23 | 1.0.17 | P2-T2 完了マーク（commit `ff1390f`）。影響マップ — computeInfluenceMap + computeInfluenceDiff + Int16Array拡散。新規テスト 9 件（合計 153 件）。M4 進行中 |
+| 2026-05-23 | 1.0.18 | P2-T3 完了マーク（commit `dc97deb`）。AI v1 影響マップベース — 前線圧力検出・経済評価・heavy生産切替・5tickキャッシュ。新規テスト 5 件（合計 158 件）。M4 進行中 |

@@ -302,9 +302,9 @@ test(sim): add deterministic replay equivalence test
 
 | 日付 | バージョン | 変更 |
 |---|---|---|
+| 2026-05-23 | 1.0.18 | P2-T3 完了（AI v1 影響マップベース）。`controller.ts` v1拡張 — 前線圧力検出(4セクター)・経済評価(ratio<0.4で中立優先)・heavy生産切替(都市3+&安定時)・影響マップ5tickキャッシュ。テスト 5 件追加（合計 158 件） |
 | 2026-05-23 | 1.0.17 | P2-T2 完了（影響マップ）。`influence-map.ts` 新規作成 — computeInfluenceMap + computeInfluenceDiff 純関数。Int16Array、整数演算のみ、3回ガウシアン拡散。テスト 9 件追加（合計 153 件） |
 | 2026-05-23 | 1.0.16 | P2-T1 完了（Heavy ユニット）。`constants.ts` supplyCost追加、`types.ts` set-production Command、`produce-units.ts`/`remove-dead.ts` 補給コスト差分、`commands.ts` setProductionCommand、`units.ts` heavy描画（radius 0.35）、`App.svelte` 都市クリックトグル。テスト 12 件追加（合計 144 件） |
-| 2026-05-23 | 1.0.15 | P1-T15 完了（Cloudflare Pages デプロイ）。`vite.config.ts` manualChunks + `_redirects` SPA フォールバック。公開 URL: dots-war-sim.pages.dev。M3完了、Phase 1 全完了 |
 
 ---
 
