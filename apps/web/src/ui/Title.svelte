@@ -7,7 +7,7 @@
 </script>
 
 <div class="title-screen">
-  <h1 class="title">War of Dots</h1>
+  <h1 class="title">Dots War Sim</h1>
   <p class="subtitle">Minimal RTS</p>
   <button class="start-btn" onclick={onstart}>Start Game</button>
 </div>
