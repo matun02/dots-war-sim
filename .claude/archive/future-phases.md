@@ -155,6 +155,61 @@ export function computeInfluenceMap(state: GameState): InfluenceData;
 
 ---
 
+## P2-T7: 勝利条件 80% + 影響マップ都市重み
+
+**概要**: 勝利条件を本家準拠の 80% 都市支配に変更し、影響マップに都市パワー投射を追加する。
+
+**仕様**:
+
+1. **勝利条件変更** (`evaluate-game-end.ts`):
+   - 現在: `state.cities.every(c => c.owner === pid)` — 全都市占領で domination
+   - 変更後: 所有都市数 / 全都市数 ≥ 0.8 で domination 勝利
+   - `annihilation`（全ユニット殲滅）と `timeout`（時間切れ都市数比較）は変更なし
+
+2. **影響マップ都市パワー投射** (`influence-map.ts`):
+   - `computeInfluenceMap` のステップ 2 に都市重み加算を追加
+   - 所有者がいる都市位置に `city_weight = 300` を加算
+   - 中立都市（`owner === null`）は加算しない
+   - ユニット重み（light=100, heavy=200）と同じ処理フローで加算
+
+**変更ファイル**:
+- `packages/core/src/sim/steps/evaluate-game-end.ts`: domination 判定を 80% 閾値に
+- `packages/core/src/sim/steps/evaluate-game-end.test.ts`: 80% テストケース追加
+- `packages/core/src/sim/influence-map.ts`: 都市重み加算ロジック追加
+- `packages/core/src/sim/influence-map.test.ts`: 都市重みテスト追加
+- `packages/core/src/sim/constants.ts`: `CITY_INFLUENCE_WEIGHT = 300` 定数追加（必要に応じて）
+
+**ディレクトリ**: `packages/core`（1）
+**見積**: 1.5h
+**依存**: P2-T2（influence-map.ts が存在する前提）
+
+---
+
+# Phase 2.5: 戦闘メカニクス拡張（将来）
+
+> 本家 War of Dots との比較調査（2026-05-23）で特定されたゲーム性ギャップを埋める拡張。
+> Phase 2 完了後、Phase 3（マルチプレイ）の前に実施を検討。
+
+## P2.5-T1: 包囲メカニクス
+- **概要**: 影響マップの差分で「敵陣深部」にいるユニットに HP 減少ペナルティを与える
+- **仕様**: 影響差分が閾値を超えるセルにいるユニットは毎 tick HP が微減。完全包囲で急速消耗
+- **ディレクトリ**: `packages/core`（sim step 追加）
+- **依存**: P2-T2（影響マップ）, P2-T7（都市重み）
+
+## P2.5-T2: 回復メカニクス
+- **概要**: 自陣影響圏内（影響差分が正）のユニットが HP を自動回復する
+- **仕様**: 自陣深部ほど回復速度が速い。前線付近では回復しない。回復は heavy のみ or 全ユニットで検討
+- **ディレクトリ**: `packages/core`（sim step 追加）
+- **依存**: P2-T2（影響マップ）
+
+## P2.5-T3: ECO システム（維持コスト）
+- **概要**: ユニット維持コストを導入し、都市喪失の重大性を高める
+- **仕様**: 都市数に応じた維持コスト上限。都市が減ると既存ユニットが維持できなくなり自然消耗
+- **ディレクトリ**: `packages/core` + `apps/web`
+- **依存**: P2-T1（heavy ユニット supplyCost）
+
+---
+
 # Phase 3: マルチプレイ（Lockstep）
 
 ## P3-T1: apps/server の追加

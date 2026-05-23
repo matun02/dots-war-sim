@@ -204,5 +204,5 @@ feat(ui): add first-launch tutorial overlay (P2-T6)
 コミット後に `git push` すること。
 完了後に `.claude/skills/skill-task-completion.md` に従い TASKS.md / CLAUDE.md を更新してコミット・push すること。
 
-★ P2-T6 完了で **M4（Phase 2 完了）マイルストーン達成**。
-TASKS.md のマイルストーンセクションで M4 を「✅ 全完了」に更新すること。
+★ P2-T6 完了後、残りは P2-T7（勝利条件 80% + 影響マップ都市重み）のみ。
+M4 マイルストーンは P2-T7 完了で達成。
