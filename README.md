@@ -43,7 +43,7 @@ pnpm format
 ## ワークスペース構成
 
 ```
-war-of-dots/
+dots-war-sim/
 ├── apps/web/         # Svelte 5 + Vite + PixiJS (クライアント)
 ├── packages/core/    # 純TS の sim/共通ロジック (決定論的)
 └── .claude/          # プロジェクト規約・設計・作業手順

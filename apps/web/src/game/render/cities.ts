@@ -1,5 +1,5 @@
 import { type Application, Container, Graphics } from 'pixi.js';
-import type { City } from '@war-of-dots/core';
+import type { City } from '@dots-war-sim/core';
 
 const PLAYER_COLORS: Record<number, number> = {
   0: 0x4488ff, // blue

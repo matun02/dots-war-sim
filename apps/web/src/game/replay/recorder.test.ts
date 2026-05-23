@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { InputFrame, PlayerId, EntityId } from '@war-of-dots/core';
+import type { InputFrame, PlayerId, EntityId } from '@dots-war-sim/core';
 import { createReplayRecorder } from './recorder.js';
 
 describe('ReplayRecorder', () => {

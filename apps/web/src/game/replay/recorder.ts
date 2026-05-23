@@ -1,4 +1,4 @@
-import type { InputFrame } from '@war-of-dots/core';
+import type { InputFrame } from '@dots-war-sim/core';
 
 export interface ReplayRecorder {
   record(frame: InputFrame): void;

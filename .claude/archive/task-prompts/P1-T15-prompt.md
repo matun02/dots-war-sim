@@ -83,11 +83,11 @@ Cloudflare Pages は SPA 対応だが、念のため:
 **方法 A: wrangler CLI で手動デプロイ（推奨 — MVP 最速）**
 ```bash
 # wrangler をグローバルインストール or npx
-npx wrangler pages project create war-of-dots
-npx wrangler pages deploy apps/web/dist --project-name=war-of-dots
+npx wrangler pages project create dots-war-sim
+npx wrangler pages deploy apps/web/dist --project-name=dots-war-sim
 ```
 - Cloudflare アカウントへのログインが必要（`npx wrangler login`）
-- プロジェクト名: `war-of-dots`（→ `war-of-dots.pages.dev`）
+- プロジェクト名: `dots-war-sim`（→ `dots-war-sim.pages.dev`）
 
 **方法 B: GitHub 連携（Cloudflare Dashboard）**
 - Cloudflare Dashboard → Pages → Create a project → Connect to Git
@@ -133,12 +133,12 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=war-of-dots
+          command: pages deploy apps/web/dist --project-name=dots-war-sim
 ```
 - シークレット: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` を GitHub に登録
 
 #### 6. 動作確認
-公開 URL（`war-of-dots.pages.dev` or 類似）で以下を確認:
+公開 URL（`dots-war-sim.pages.dev` or 類似）で以下を確認:
 - タイトル画面が表示される
 - Start Game → AI と対戦開始
 - ユニット選択・移動が動作

@@ -1,5 +1,5 @@
 {
-  "name": "war-of-dots",
+  "name": "dots-war-sim",
   "version": "0.0.0",
   "private": true,
   "description": "War of Dots clone — a minimal RTS game (Web, TypeScript)",
@@ -9,7 +9,7 @@
   },
   "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "dev": "pnpm --filter @war-of-dots/web dev",
+    "dev": "pnpm --filter @dots-war-sim/web dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",

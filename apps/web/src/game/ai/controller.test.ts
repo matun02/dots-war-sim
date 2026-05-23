@@ -8,8 +8,8 @@ import type {
   CityId,
   MapDef,
   Vec2,
-} from '@war-of-dots/core';
-import { Rng } from '@war-of-dots/core';
+} from '@dots-war-sim/core';
+import { Rng } from '@dots-war-sim/core';
 import { createAIController } from './controller.js';
 
 const AI_PLAYER = 1 as PlayerId;

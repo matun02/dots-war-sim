@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { EntityId, PlayerId, Unit } from '@war-of-dots/core';
+import type { EntityId, PlayerId, Unit } from '@dots-war-sim/core';
 import { unitsInRect } from './selection.js';
 
 function makeUnit(

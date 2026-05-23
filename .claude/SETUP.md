@@ -67,7 +67,7 @@ pnpm --version    # 9.15.0
 
 ```powershell
 git clone <repo>
-cd war-of-dots
+cd dots-war-sim
 git config core.autocrlf false   # 既に設定済みのリポジトリならスキップ可
 git config core.eol lf
 pnpm install
@@ -78,7 +78,7 @@ pnpm install
 ```powershell
 pnpm dev                                 # ルートから (= apps/web の dev)
 # または明示的に：
-pnpm --filter @war-of-dots/web dev
+pnpm --filter @dots-war-sim/web dev
 ```
 
 `http://localhost:5173` を開いて "Hello War of Dots" が表示されれば成功。
@@ -145,7 +145,7 @@ corepack enable
 corepack prepare pnpm@9.15.0 --activate
 
 # 以降は §2.5 と同じ
-git clone <repo> && cd war-of-dots && pnpm install
+git clone <repo> && cd dots-war-sim && pnpm install
 ```
 
 corepack は macOS/Linux では問題なく動く。

@@ -1,4 +1,4 @@
-import type { EntityId, Unit, Vec2 } from '@war-of-dots/core';
+import type { EntityId, Unit, Vec2 } from '@dots-war-sim/core';
 
 export interface SelectionBox {
   startWorld: Vec2;

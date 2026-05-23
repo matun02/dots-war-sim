@@ -10,8 +10,8 @@
     Rng,
     createInitialState,
     tick,
-  } from '@war-of-dots/core';
-  import { loadMap, firstBloodJson } from '@war-of-dots/maps';
+  } from '@dots-war-sim/core';
+  import { loadMap, firstBloodJson } from '@dots-war-sim/maps';
   import { createStage, destroyStage, type Application } from './game/render/stage';
   import { drawTerrain } from './game/render/terrain';
   import { drawGrid } from './game/render/grid';

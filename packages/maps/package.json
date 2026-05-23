@@ -1,5 +1,5 @@
 {
-  "name": "@war-of-dots/maps",
+  "name": "@dots-war-sim/maps",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@war-of-dots/core": "workspace:*",
+    "@dots-war-sim/core": "workspace:*",
     "valibot": "^1.0.0"
   },
   "devDependencies": {

@@ -70,9 +70,9 @@
 ## 3. ディレクトリ構成（pnpm workspaces）
 
 ```
-war-of-dots/
+dots-war-sim/
 ├── apps/
-│   ├── web/                 # @war-of-dots/web — Svelte 5 + Vite + PixiJS（クライアント）
+│   ├── web/                 # @dots-war-sim/web — Svelte 5 + Vite + PixiJS（クライアント）
 │   │   ├── src/
 │   │   │   ├── ui/          # Svelte コンポーネント
 │   │   │   ├── game/
@@ -84,10 +84,10 @@ war-of-dots/
 │   │   │   ├── stores/      # Zustand (UI only)
 │   │   │   └── main.ts
 │   │   └── public/assets/
-│   └── server/              # @war-of-dots/server — Cloudflare Workers（Phase3 以降）
+│   └── server/              # @dots-war-sim/server — Cloudflare Workers（Phase3 以降）
 │       └── src/
 ├── packages/
-│   ├── core/                # @war-of-dots/core — ★最重要：sim・型・共通ロジック
+│   ├── core/                # @dots-war-sim/core — ★最重要：sim・型・共通ロジック
 │   │   ├── src/
 │   │   │   ├── sim/         # 純関数シミュレーション
 │   │   │   ├── pathfinding/
@@ -95,8 +95,8 @@ war-of-dots/
 │   │   │   ├── replay.ts
 │   │   │   └── types.ts
 │   │   └── package.json
-│   ├── maps/                # @war-of-dots/maps — マップ JSON + バリデーション
-│   └── assets/              # @war-of-dots/assets — 共通アセット定義
+│   ├── maps/                # @dots-war-sim/maps — マップ JSON + バリデーション
+│   └── assets/              # @dots-war-sim/assets — 共通アセット定義
 ├── tests/
 │   └── e2e/                 # Playwright
 ├── .github/workflows/
@@ -111,8 +111,8 @@ war-of-dots/
 └── README.md
 ```
 
-★MUST: 全パッケージは `@war-of-dots/<name>` スコープを使う。
-`pnpm --filter` 指定時は **`pnpm --filter @war-of-dots/web dev`** のようにフルネームを指定する（短縮の `web` は package.json の name と一致しないため動かない）。
+★MUST: 全パッケージは `@dots-war-sim/<name>` スコープを使う。
+`pnpm --filter` 指定時は **`pnpm --filter @dots-war-sim/web dev`** のようにフルネームを指定する（短縮の `web` は package.json の name と一致しないため動かない）。
 
 ### 3.1 依存方向（★MUST）
 

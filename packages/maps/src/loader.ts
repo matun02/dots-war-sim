@@ -1,4 +1,4 @@
-import type { CityId, MapDef, PlayerId } from '@war-of-dots/core';
+import type { CityId, MapDef, PlayerId } from '@dots-war-sim/core';
 import * as v from 'valibot';
 import { MapJsonSchema } from './schema.js';
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { PlayerId, Replay } from '@war-of-dots/core';
-import { REPLAY_VERSION, hashState } from '@war-of-dots/core';
+import type { PlayerId, Replay } from '@dots-war-sim/core';
+import { REPLAY_VERSION, hashState } from '@dots-war-sim/core';
 import { createReplayPlayer } from './player.js';
 
 function makeReplay(finalTick: number): Replay {

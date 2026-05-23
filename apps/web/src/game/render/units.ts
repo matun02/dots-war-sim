@@ -5,7 +5,7 @@ import {
   Sprite,
   type Texture,
 } from 'pixi.js';
-import type { EntityId, Unit } from '@war-of-dots/core';
+import type { EntityId, Unit } from '@dots-war-sim/core';
 
 const PLAYER_COLORS: Record<number, number> = {
   0: 0x4488ff,
