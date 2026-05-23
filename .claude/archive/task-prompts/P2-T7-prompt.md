@@ -174,3 +174,6 @@ feat(sim): add 80% domination victory and city influence weight (P2-T7)
 
 ★ P2-T7 完了で **M4（Phase 2 完了）マイルストーン達成**。
 TASKS.md のマイルストーンセクションで M4 を「✅ 全完了」に更新すること。
+
+### 補足: P2-T6 チュートリアル文言の更新
+P2-T6 で作成される `Tutorial.svelte` の勝利条件ステップに「敵の全都市を占領 or 全ユニットを殲滅で勝利」と記載されている。P2-T7 完了後、「80% の都市を支配 or 全ユニットを殲滅で勝利」に更新すること。
