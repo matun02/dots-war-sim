@@ -7,31 +7,151 @@
 
 # Phase 2: AI 改善 / Heavy / 複数マップ
 
+> 設計詳細化: 2026-05-23（P2-design タスク）
+
 ## P2-T1: Heavy ユニット
-- light に加えて heavy を実装。地形通行制限を A* に反映。
-- 補給スロット消費 2、生産時間 6 秒、HP 5, 攻撃 3。
-- 都市の `production` で切り替え可能に。
-- UI: 都市クリックで生産種別を切り替えるトグル。
+
+**概要**: light に加えて heavy を実装。地形通行制限を A* に反映。
+
+**既に実装済み**:
+- `types.ts`: `UnitKind = 'light' | 'heavy'`
+- `constants.ts`: `UNIT_STATS.heavy` (speed:2, attack:3, hp:5, attackIntervalTicks:30, produceIntervalTicks:180)
+- `astar.ts`: `TERRAIN_COST_HEAVY = [1, -1, -1, -1, 1]`
+- `schema.ts`: `production: picklist(['light', 'heavy'])`
+- sim ステップ各所で `unit.kind` を参照済み
+
+**新規実装**:
+1. `UNIT_STATS` に `supplyCost` フィールド追加: light=1, heavy=2
+2. `produce-units.ts`: `supplyUsed + supplyCost <= SUPPLY_MAX` チェック、`supplyUsed += supplyCost`
+3. `remove-dead.ts`: `supplyUsed -= UNIT_STATS[unit.kind].supplyCost`
+4. `types.ts`: `Command` に `{ type: 'set-production'; player: PlayerId; cityId: CityId; production: UnitKind }` 追加
+5. `apply-inputs.ts`: `set-production` ハンドラ（自プレイヤーの都市のみ変更可）
+6. `commands.ts`: `setProductionCommand(cityId, production)` 追加
+7. `units.ts`: heavy は大きめの円（radius * 1.4）+ 異なる形状で視覚的に区別
+8. `App.svelte`: 自都市クリック → `set-production` コマンド発行（light↔heavy トグル）
+
+**ディレクトリ**: `packages/core` + `apps/web`（2）
+**見積**: 3h
+**依存**: なし
+
+---
 
 ## P2-T2: 影響マップ
-- `core/sim/influence-map.ts` を実装（5tick ごと更新）
-- 各陣営の `Int16Array` + ガウシアン拡散
-- AI が利用、前線描画にも利用
+
+**概要**: `packages/core/src/sim/influence-map.ts` を新規実装。
+
+**仕様（DESIGN.md §8.1〜§8.2）**:
+- データ構造: `Int16Array(width * height)` × 陣営数
+- 計算方式:
+  1. マップ全体を 0 クリア
+  2. 各ユニット位置に重み（light=100, heavy=200）を加算
+  3. ガウシアン拡散（3 回反復、3×3 カーネル）
+- 更新頻度: 5 tick ごと（DESIGN.md §8.2）
+- 出力:
+
+```ts
+export interface InfluenceData {
+  maps: Int16Array[];   // maps[playerId] = Int16Array(w * h)
+  width: number;
+  height: number;
+}
+export function computeInfluenceMap(state: GameState): InfluenceData;
+```
+
+**ディレクトリ**: `packages/core`（1）
+**見積**: 2h
+**依存**: なし
+
+---
 
 ## P2-T3: AI v1（影響マップベース）
-- 押し込まれている境界を検出 → 押し返し
-- 経済 / 軍事のバランス評価
-- 難易度パラメータの再調整
+
+**概要**: 影響マップを使って戦略的に行動する AI v1 を実装。
+
+**仕様（DESIGN.md §9.2〜§9.3）**:
+- 影響マップを取得し「最も押し込まれている」前線セクターを検出
+- 押し返し方向にユニット群を投入
+- 経済評価: 都市数比率。軍事評価: 前線での影響度比率
+- 難易度パラメータ:
+  - Easy: thinkIntervalTicks=90, selectionAccuracy=0.7
+  - Normal: thinkIntervalTicks=30, selectionAccuracy=0.85
+  - Hard: thinkIntervalTicks=1, selectionAccuracy=0.95
+- heavy ユニットの生産判断: 前線が安定 → heavy を優先的に生産切替
+
+**変更ファイル**:
+- `apps/web/src/game/ai/controller.ts`: v1 ロジック追加（v0 は fallback として残す）
+- `packages/core/src/sim/index.ts`: `computeInfluenceMap` の export 追加（P2-T2 で実装済み前提）
+
+**ディレクトリ**: `apps/web` + `packages/core`（export のみ）（2）
+**見積**: 3h
+**依存**: P2-T2
+
+---
 
 ## P2-T4: 前線描画
-- マーチングスクエアで等高線生成
-- PixiJS Graphics で薄い半透明線
+
+**概要**: 影響マップの等高線をマーチングスクエアで描画。
+
+**仕様（DESIGN.md §8.3）**:
+- `infl[playerA] - infl[playerB]` の 0 等高線を計算
+- マーチングスクエア法（16 パターン）で線分リスト生成
+- PixiJS `Graphics` で半透明線描画（白, alpha=0.3, width=2）
+- 5 tick ごと更新（影響マップと同期）
+
+**新規ファイル**: `apps/web/src/game/render/frontline.ts`
+
+**ディレクトリ**: `apps/web`（1）
+**見積**: 2h
+**依存**: P2-T2
+
+---
 
 ## P2-T5: マップ追加（合計 5 枚）
-- バリエーション: 中央橋、4 隅都市、海峡、回廊、ランダム生成例
+
+**概要**: 既存 first-blood に加え 4 マップを追加。合計 5 枚。
+
+**マップ構成**:
+| ID | テーマ | サイズ | 都市数 | 特徴 |
+|---|---|---|---|---|
+| `first-blood` | （既存） | 64×36 | 5 | 中央山脈 + 森林 |
+| `bridge` | 中央橋 | 48×36 | 6 | 中央に水域、橋（平地帯）で接続 |
+| `four-corners` | 4 隅都市 | 48×48 | 8 | 4 隅に初期都市、中央に中立都市群 |
+| `strait` | 海峡 | 64×36 | 6 | 左右を水域で分断、狭い海峡で接続 |
+| `corridor` | 回廊 | 64×36 | 6 | 山脈で区切られた複数の回廊 |
+
+**変更ファイル**:
+- `packages/maps/src/data/`: 4 JSON 追加
+- `packages/maps/src/index.ts`: 新マップの export 追加
+- `apps/web/src/ui/Title.svelte`: マップ選択 UI 追加
+- `apps/web/src/App.svelte`: 選択マップを `startGame()` に渡す
+
+**ディレクトリ**: `packages/maps` + `apps/web`（2）
+**見積**: 2h
+**依存**: なし
+
+---
 
 ## P2-T6: チュートリアル
-- 最初の起動時のみ、操作説明オーバーレイ
+
+**概要**: 初回起動時に操作説明オーバーレイを表示。
+
+**仕様**:
+- 表示タイミング: ゲーム開始直後（`startGame()` 内）で初回のみ
+- 初回判定: `idb-keyval` で `tutorialSeen: boolean` を永続化
+- 表示内容（DESIGN.md §12.2 より）:
+  1. 左ドラッグ → 矩形選択
+  2. 右クリック → 移動命令
+  3. 自都市クリック → 生産切替（P2-T1 で追加）
+  4. ホイール → ズーム
+  5. Space → ポーズ
+- UI: 半透明オーバーレイ + ステップ送り（Next / Skip）
+- 「今後表示しない」チェックボックスまたは Skip で完了
+
+**新規ファイル**: `apps/web/src/ui/Tutorial.svelte`
+
+**ディレクトリ**: `apps/web`（1）
+**見積**: 2h
+**依存**: なし（P2-T1 完了後が望ましいが必須ではない）
 
 ---
 
