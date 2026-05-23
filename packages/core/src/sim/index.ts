@@ -30,3 +30,5 @@ export {
 } from './constants.js';
 export { SpatialHash } from './spatial-hash.js';
 export { hashState } from './hash.js';
+export { computeInfluenceMap, computeInfluenceDiff } from './influence-map.js';
+export type { InfluenceData } from './influence-map.js';
