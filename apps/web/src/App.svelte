@@ -3,11 +3,13 @@
   import {
     type InputFrame,
     type GameResult,
+    type InfluenceData,
     type Player,
     type PlayerId,
     type Replay,
     REPLAY_VERSION,
     Rng,
+    computeInfluenceMap,
     createInitialState,
     tick,
   } from '@dots-war-sim/core';
@@ -18,6 +20,7 @@
   import { createCityRenderer } from './game/render/cities';
   import { createUnitRenderer } from './game/render/units';
   import { createSelectionRenderer } from './game/render/selection-box';
+  import { createFrontlineRenderer } from './game/render/frontline';
   import { createLoop, type LoopHandle } from './game/loop';
   import { createInputCollector } from './game/input/commands';
   import { unitsInRect, type SelectionBox } from './game/input/selection';
@@ -101,6 +104,9 @@
     const cityRenderer = createCityRenderer(app, cellPx);
     cityRenderer.update(cur.cities);
 
+    const frontlineRenderer = createFrontlineRenderer(cellPx);
+    app.stage.addChild(frontlineRenderer.container);
+
     const unitRenderer = createUnitRenderer(app, cellPx);
     app.stage.addChild(unitRenderer.container);
 
@@ -108,6 +114,9 @@
     app.stage.addChild(selectionRenderer.container);
 
     const inputCollector = createInputCollector(0 as PlayerId);
+
+    let cachedInfluence: InfluenceData | null = null;
+    let lastInfluenceTick = -1;
 
     let dragging = false;
     let selectionBox: SelectionBox | null = null;
@@ -210,6 +219,15 @@
       },
       onRender: (alpha) => {
         cityRenderer.update(cur.cities);
+
+        if (cur.tick - lastInfluenceTick >= 5) {
+          cachedInfluence = computeInfluenceMap(cur);
+          lastInfluenceTick = cur.tick;
+        }
+        if (cachedInfluence) {
+          frontlineRenderer.update(cachedInfluence, 0 as PlayerId, 1 as PlayerId);
+        }
+
         unitRenderer.update(prev.units, cur.units, alpha, inputCollector.selectedIds);
 
         if (cur.result !== null && screen === 'game') {
@@ -248,6 +266,8 @@
     drawTerrain(app, map, cellPx);
     drawGrid(app, map.width, map.height, cellPx);
     const cityRenderer = createCityRenderer(app, cellPx);
+    const replayFrontlineRenderer = createFrontlineRenderer(cellPx);
+    app.stage.addChild(replayFrontlineRenderer.container);
     const unitRenderer = createUnitRenderer(app, cellPx);
     app.stage.addChild(unitRenderer.container);
 
@@ -255,6 +275,8 @@
     let prevState = rp.state();
     let curState = rp.state();
     const savedResult = lastReplay.result;
+    let replayInfluence: InfluenceData | null = null;
+    let replayLastInflTick = -1;
 
     cityRenderer.update(curState.cities);
 
@@ -272,6 +294,15 @@
       },
       onRender: (alpha) => {
         cityRenderer.update(curState.cities);
+
+        if (curState.tick - replayLastInflTick >= 5) {
+          replayInfluence = computeInfluenceMap(curState);
+          replayLastInflTick = curState.tick;
+        }
+        if (replayInfluence) {
+          replayFrontlineRenderer.update(replayInfluence, 0 as PlayerId, 1 as PlayerId);
+        }
+
         unitRenderer.update(prevState.units, curState.units, alpha, []);
       },
     });
