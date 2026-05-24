@@ -64,7 +64,7 @@ Phase 1 全タスク（P1-T1〜T15）完了。M3（公開済み）マイルス�
 
 ### M4 マイルストーン定義
 
-Phase 2 全タスク（P2-T1〜T7 + T4.1）完了で M4 達成:
+Phase 2 全タスク（P2-T1〜T7 + T4.1〜T4.2）完了で M4 達成:
 - Heavy ユニットが生産・移動・戦闘・地形制限付きで動作
 - 影響マップが 5tick ごとに計算される（都市パワー投射含む）
 - AI v1 が影響マップを使って戦略的に行動する
@@ -82,6 +82,7 @@ Phase 2 全タスク（P2-T1〜T7 + T4.1）完了で M4 達成:
 | P2-T3 | AI v1（影響マップベース） | P2-T2 | `apps/web` + `packages/core` | 3h |
 | P2-T4 | 前線描画（マーチングスクエア） | P2-T2 | `apps/web` | 2h |
 | P2-T4.1 | 前線・領土システム再設計 | P2-T4 | `packages/core` + `apps/web` | 3h |
+| P2-T4.2 | 隊形配置・衝突分離・HP/サイズ3倍 | P2-T4.1 | `packages/core` + `apps/web` | 3h |
 | P2-T5 | マップ追加（計 5 枚） | — | `packages/maps` + `apps/web` | 2h |
 | P2-T6 | チュートリアル | — | `apps/web` | 2h |
 | P2-T7 | 勝利条件 80% + 影響マップ都市重み | P2-T2 | `packages/core` | 1.5h |
@@ -92,45 +93,51 @@ Phase 2 全タスク（P2-T1〜T7 + T4.1）完了で M4 達成:
 P2-T1 ──────────────────────────────┐
 P2-T2 ──┬── P2-T3（AI v1）          │
         ├── P2-T4（前線描画）        │
-        │    └── P2-T4.1（再設計）   ├── M4
+        │    └── P2-T4.1（再設計）   │
+        │         └── P2-T4.2（隊形等）├── M4
         └── P2-T7（勝利条件+都市重み）│
 P2-T5 ──────────────────────────────┤
 P2-T6 ──────────────────────────────┘
 ```
 
-推奨実行順: T1 → T2 → T3 → T4 → **T4.1** → T5 → T6 → T7
+推奨実行順: T1 → T2 → T3 → T4 → T4.1 → **T4.2** → T5 → T6 → T7
 
 ---
 
-### ★次タスク: P2-T5 マップ追加（計 5 枚）
+### ★次タスク: P2-T4.2 隊形配置・衝突分離・HP/サイズ 3 倍
+
+**入力**: P2-T4.1 ウェブテストでのユーザーフィードバック。**依存: P2-T4.1**
+
+**改善内容**:
+1. 初期ユニットを隊形（縦・横・斜め）で密集配置（ランダム散布 → 整列）
+2. 後方拠点の明確化（隊形を spawn 都市の前方に配置）
+3. ユニット同士の衝突分離（重なり防止）
+4. light HP: 1→3, heavy HP: 5→15, 描画サイズも 3 倍
+
+**作業ファイル**:
+- `packages/core/src/sim/init.ts` — 隊形配置ロジック
+- `packages/core/src/sim/constants.ts` — HP 3 倍
+- `packages/core/src/sim/steps/separate-units.ts` — 衝突分離ステップ（新規）
+- `packages/core/src/sim/tick.ts` — パイプライン追加
+- `apps/web/src/game/render/units.ts` — 描画サイズ 3 倍
+
+**ディレクトリ**: `packages/core` + `apps/web`（2 ディレクトリ）
+
+**見積**: 3h
+
+**プロンプト**: `archive/task-prompts/P2-T4.2-prompt.md`
+
+---
+
+### 次々タスク: P2-T5 マップ追加（計 5 枚）
 
 **入力**: future-phases.md P2-T5。**依存: なし**
 
 **作業内容**:
 - `packages/maps/src/data/` に 4 マップ JSON 追加（中央橋、4 隅都市、海峡、回廊）
-- `index.ts` 更新
-- `Title.svelte` にマップ選択 UI 追加
-- `App.svelte` で選択マップを `loadMap` に渡す
+- `index.ts` 更新、`Title.svelte` にマップ選択 UI、`App.svelte` で受け渡し
 
 **ディレクトリ**: `packages/maps` + `apps/web`（2 ディレクトリ）
-
-**見積**: 2h
-
-**プロンプト**: `archive/task-prompts/P2-T5-prompt.md`
-
----
-
-### 次々タスク: P2-T6 チュートリアル
-
-**入力**: DESIGN.md §12.2。**依存: なし**
-
-**作業内容**:
-- `apps/web/src/ui/Tutorial.svelte` 新規作成
-- 操作説明オーバーレイ（矩形選択・移動命令・生産切替等）
-- 初回起動フラグを IndexedDB（`idb-keyval`）で管理
-- `App.svelte` に統合
-
-**ディレクトリ**: `apps/web`（1 ディレクトリ）
 
 **見積**: 2h
 
