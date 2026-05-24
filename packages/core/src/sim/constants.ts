@@ -12,7 +12,7 @@ export const UNIT_STATS = {
   light: {
     speed: 4,
     attack: 1,
-    hp: 1,
+    hp: 3,
     attackIntervalTicks: 15,
     produceIntervalTicks: 60,
     supplyCost: 1,
@@ -20,7 +20,7 @@ export const UNIT_STATS = {
   heavy: {
     speed: 2,
     attack: 3,
-    hp: 5,
+    hp: 15,
     attackIntervalTicks: 30,
     produceIntervalTicks: 180,
     supplyCost: 2,

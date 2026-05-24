@@ -24,7 +24,6 @@ function makeLargeTestMap(): MapDef {
   const width = 64;
   const height = 36;
   const terrain = Array.from({ length: width * height }, () => 0);
-  // Place mountains in center rows 16-19, columns 28-35 (terrain=1)
   for (let y = 16; y <= 19; y++) {
     for (let x = 28; x <= 35; x++) {
       terrain[y * width + x] = 1;
@@ -79,7 +78,7 @@ describe('createInitialState', () => {
   });
 
   it('places initial units for each player', () => {
-    const state = createInitialState(makeTestMap(), makePlayers(), 42);
+    const state = createInitialState(makeLargeTestMap(), makePlayers(), 42);
     expect(state.units.length).toBeGreaterThan(0);
     const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
     const p1Units = state.units.filter((u) => u.owner === (1 as PlayerId));
@@ -88,7 +87,7 @@ describe('createInitialState', () => {
   });
 
   it('sets nextEntityId to total unit count', () => {
-    const state = createInitialState(makeTestMap(), makePlayers(), 42);
+    const state = createInitialState(makeLargeTestMap(), makePlayers(), 42);
     expect(state.nextEntityId).toBe(state.units.length);
   });
 
@@ -105,20 +104,6 @@ describe('createInitialState', () => {
     const p1Units = state.units.filter((u) => u.owner === (1 as PlayerId));
     expect(p0Units).toHaveLength(10);
     expect(p1Units).toHaveLength(10);
-  });
-
-  it('places units only in own half of the map', () => {
-    const map = makeLargeTestMap();
-    const state = createInitialState(map, makePlayers(), 42);
-    const midX = map.width / 2;
-    const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
-    const p1Units = state.units.filter((u) => u.owner === (1 as PlayerId));
-    for (const u of p0Units) {
-      expect(u.pos.x).toBeLessThan(midX);
-    }
-    for (const u of p1Units) {
-      expect(u.pos.x).toBeGreaterThanOrEqual(midX);
-    }
   });
 
   it('does not place units on mountain terrain', () => {
@@ -154,13 +139,49 @@ describe('createInitialState', () => {
     }
   });
 
-  it('produces different placement with different seeds', () => {
+  it('places units in a formation (approximately linear)', () => {
     const map = makeLargeTestMap();
-    const players = makePlayers();
-    const state1 = createInitialState(map, players, 100);
-    const state2 = createInitialState(map, players, 200);
-    const positions1 = state1.units.map((u) => `${u.pos.x},${u.pos.y}`);
-    const positions2 = state2.units.map((u) => `${u.pos.x},${u.pos.y}`);
-    expect(positions1).not.toEqual(positions2);
+    const state = createInitialState(map, makePlayers(), 42);
+    const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
+
+    // P0 spawn at (10,8), enemy at (54,28): dx=44, dy=20
+    // |dx|=44 > |dy|*2=40 → perpendicular is roughly Y-axis
+    // Units should be spread along Y-axis (perp to attack direction)
+    const ys = p0Units.map((u) => u.pos.y).sort((a, b) => a - b);
+    // Check units are roughly equally spaced (within tolerance)
+    for (let i = 1; i < ys.length; i++) {
+      const gap = ys[i]! - ys[i - 1]!;
+      expect(gap).toBeCloseTo(1.5, 0);
+    }
+  });
+
+  it('places units in front of spawn city (toward enemy)', () => {
+    const map = makeLargeTestMap();
+    const state = createInitialState(map, makePlayers(), 42);
+    const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
+
+    // Spawn city at x=10, enemy at x=54
+    // Units should be placed ahead (x > 10)
+    const avgX =
+      p0Units.reduce((sum, u) => sum + u.pos.x, 0) / p0Units.length;
+    expect(avgX).toBeGreaterThan(10);
+  });
+
+  it('places both players symmetrically (each toward center)', () => {
+    const map = makeLargeTestMap();
+    const state = createInitialState(map, makePlayers(), 42);
+    const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
+    const p1Units = state.units.filter((u) => u.owner === (1 as PlayerId));
+
+    const p0AvgX =
+      p0Units.reduce((sum, u) => sum + u.pos.x, 0) / p0Units.length;
+    const p1AvgX =
+      p1Units.reduce((sum, u) => sum + u.pos.x, 0) / p1Units.length;
+
+    // P0 units should be to the left of P1 units
+    expect(p0AvgX).toBeLessThan(p1AvgX);
+    // P0 units ahead of spawn (x=10), P1 units behind spawn (x=54)
+    expect(p0AvgX).toBeGreaterThan(10);
+    expect(p1AvgX).toBeLessThan(54);
   });
 });

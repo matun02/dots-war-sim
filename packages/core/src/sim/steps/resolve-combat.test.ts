@@ -161,7 +161,7 @@ describe('resolveCombat', () => {
     expect(state.units.find((u) => (u.id as number) === 1)!.hp).toBe(0);
   });
 
-  it('heavy kills light in one hit (attack=3 vs hp=1)', () => {
+  it('heavy kills light in one hit (attack=3 vs hp=3)', () => {
     const heavy = makeUnit({
       id: eid(0),
       owner: pid(0),
@@ -188,7 +188,7 @@ describe('resolveCombat', () => {
     );
   });
 
-  it('light needs 5 attacks to kill heavy (attack=1 vs hp=5)', () => {
+  it('light needs hp/attack attacks to kill heavy', () => {
     const heavy = makeUnit({
       id: eid(0),
       owner: pid(0),
@@ -206,7 +206,8 @@ describe('resolveCombat', () => {
     });
     const state = makeState([heavy, light]);
 
-    for (let i = 0; i < 5; i++) {
+    const hitsNeeded = UNIT_STATS.heavy.hp / UNIT_STATS.light.attack;
+    for (let i = 0; i < hitsNeeded; i++) {
       light.attackCooldownTicks = 0;
       resolveCombat(state, rng);
     }

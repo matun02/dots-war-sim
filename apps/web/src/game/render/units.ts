@@ -15,8 +15,8 @@ const PLAYER_COLORS: Record<number, number> = {
 const FALLBACK_COLOR = 0xcccccc;
 
 const UNIT_RADIUS: Record<UnitKind, number> = {
-  light: 0.25,
-  heavy: 0.35,
+  light: 0.75,
+  heavy: 1.05,
 };
 
 export function createUnitRenderer(
