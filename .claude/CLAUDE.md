@@ -252,6 +252,7 @@ test(sim): add deterministic replay equivalence test
 - 1 タスクで触るディレクトリは **2 つまで**（横断したい時は PR を分ける）
 - 既存テストを壊さない（壊れたら原因を提示）
 - 不明点は **推測せず質問する**
+- **コミット前に `skills/skill-pre-commit-check.md` を必ず実施する**（セルフレビュー → 自動テスト → ウェブテスト）
 
 ### 7.3 ★MUST NOT：勝手にやらないこと
 - 採用済み技術スタックの差し替え
@@ -309,6 +310,7 @@ test(sim): add deterministic replay equivalence test
 
 | 日付 | バージョン | 変更 |
 |---|---|---|
+| 2026-05-24 | 1.0.20 | P2-T4 → T4.1 再設計タスク切り出し。ウェブテストで判明した問題（初期配置空、影響拡散狭、後方領土なし）の是正タスク。TASKS.md・DESIGN.md 設計見直し対象 |
 | 2026-05-24 | 1.0.19 | P2-T4 完了（前線描画）。`frontline.ts` 新規作成 — マーチングスクエア法で影響マップ差分の0等高線を計算、PixiJS Graphics白半透明線(2px, alpha 0.3)。App.svelte統合（5tickキャッシュ、ゲーム+リプレイ）。テスト 8 件追加（合計 166 件） |
 | 2026-05-23 | 1.0.18 | P2-T3 完了（AI v1 影響マップベース）。`controller.ts` v1拡張 — 前線圧力検出(4セクター)・経済評価(ratio<0.4で中立優先)・heavy生産切替(都市3+&安定時)・影響マップ5tickキャッシュ。テスト 5 件追加（合計 158 件） |
 | 2026-05-23 | 1.0.17 | P2-T2 完了（影響マップ）。`influence-map.ts` 新規作成 — computeInfluenceMap + computeInfluenceDiff 純関数。Int16Array、整数演算のみ、3回ガウシアン拡散。テスト 9 件追加（合計 153 件） |
