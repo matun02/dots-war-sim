@@ -216,14 +216,15 @@
         };
         recorder.record(frame);
         cur = tick(prev, [frame], rng);
-      },
-      onRender: (alpha) => {
-        cityRenderer.update(cur.cities);
 
         if (cur.tick - lastInfluenceTick >= 5) {
           cachedInfluence = computeInfluenceMap(cur);
           lastInfluenceTick = cur.tick;
         }
+      },
+      onRender: (alpha) => {
+        cityRenderer.update(cur.cities);
+
         if (cachedInfluence) {
           frontlineRenderer.update(cachedInfluence, 0 as PlayerId, 1 as PlayerId);
         }
@@ -291,14 +292,15 @@
           screen = 'result';
           lastReplay = null;
         }
-      },
-      onRender: (alpha) => {
-        cityRenderer.update(curState.cities);
 
         if (curState.tick - replayLastInflTick >= 5) {
           replayInfluence = computeInfluenceMap(curState);
           replayLastInflTick = curState.tick;
         }
+      },
+      onRender: (alpha) => {
+        cityRenderer.update(curState.cities);
+
         if (replayInfluence) {
           replayFrontlineRenderer.update(replayInfluence, 0 as PlayerId, 1 as PlayerId);
         }
