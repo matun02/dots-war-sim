@@ -41,6 +41,7 @@
 | P2-T2 | 影響マップ | 2026-05-23 | `ff1390f` | 9 件 (累計 153) |
 | P2-T3 | AI v1（影響マップベース） | 2026-05-23 | `dc97deb` | 5 件 (累計 158) |
 | P2-T4 | 前線描画（マーチングスクエア実装） | 2026-05-24 | `41c8257` | 8 件 (累計 166) |
+| P2-T4.1 | 前線・領土システム再設計 | 2026-05-24 | `1816f95` | 11 件 (累計 177) |
 
 > **P2-T4 備考**: マーチングスクエア法の描画ロジック自体は正常動作（テスト8件 green）。
 > ただしウェブテストで以下のゲーム設計上の問題が判明し、P2-T4.1 で対処する:
@@ -101,46 +102,45 @@ P2-T6 ────────────────────────�
 
 ---
 
-### ★次タスク: P2-T4.1 前線・領土システム再設計
+### ★次タスク: P2-T5 マップ追加（計 5 枚）
 
-**入力**: P2-T4 ウェブテストで判明した問題。**依存: P2-T4**
-
-**問題**: 前線描画のマーチングスクエア実装は正常だが、上流のゲーム設計に3つの問題がある:
-1. **初期ユニット配置が空**: `createInitialState` が `units: []` で開始。本家 War of Dots では開始時からユニットが前線に配置済み
-2. **影響マップ拡散が不足**: 3回ガウシアン拡散では半径3-4セルしか広がらず、64×36マップでは点にしかならない
-3. **後方領土の概念がない**: 自陣側が自動的に塗られず、前線がユニット周囲の輪になる
+**入力**: future-phases.md P2-T5。**依存: なし**
 
 **作業内容**:
-- `packages/core/src/sim/init.ts`: 初期ユニット配置ロジック追加（各プレイヤーの自陣半分にユニットを展開）
-- `packages/core/src/sim/influence-map.ts`: 拡散回数増加 or 都市ベース領土の加算で影響圏を広げる
-- `apps/web/src/game/render/frontline.ts`: 必要に応じて前線描画の調整
-- DESIGN.md §1.2, §8 の設計更新
+- `packages/maps/src/data/` に 4 マップ JSON 追加（中央橋、4 隅都市、海峡、回廊）
+- `index.ts` 更新
+- `Title.svelte` にマップ選択 UI 追加
+- `App.svelte` で選択マップを `loadMap` に渡す
 
-**ディレクトリ**: `packages/core` + `apps/web`（2 ディレクトリ）
+**ディレクトリ**: `packages/maps` + `apps/web`（2 ディレクトリ）
 
-**見積**: 3h
+**見積**: 2h
 
-**プロンプト**: `archive/task-prompts/P2-T4.1-prompt.md`
+**プロンプト**: `archive/task-prompts/P2-T5-prompt.md`
+
+---
+
+### 次々タスク: P2-T6 チュートリアル
+
+**入力**: DESIGN.md §12.2。**依存: なし**
+
+**作業内容**:
+- `apps/web/src/ui/Tutorial.svelte` 新規作成
+- 操作説明オーバーレイ（矩形選択・移動命令・生産切替等）
+- 初回起動フラグを IndexedDB（`idb-keyval`）で管理
+- `App.svelte` に統合
+
+**ディレクトリ**: `apps/web`（1 ディレクトリ）
+
+**見積**: 2h
 
 ---
 
 ### 残タスク一覧
 
-#### P2-T5: マップ追加（計 5 枚）
-- **入力**: future-phases.md P2-T5
-- **作業**: `packages/maps/src/data/` に 4 マップ JSON 追加（中央橋、4 隅都市、海峡、回廊）。`index.ts` 更新。`Title.svelte` にマップ選択 UI 追加。`App.svelte` で選択マップを `loadMap` に渡す。
-- **ディレクトリ**: `packages/maps` + `apps/web`
-- **見積**: 2h
-
-#### P2-T6: チュートリアル
-- **入力**: DESIGN.md §12.2
-- **作業**: `apps/web/src/ui/Tutorial.svelte` 新規作成。操作説明オーバーレイ（矩形選択・移動命令・生産切替等）。初回起動フラグを IndexedDB（`idb-keyval`）で管理。`App.svelte` に統合。
-- **ディレクトリ**: `apps/web`（1 ディレクトリ）
-- **見積**: 2h
-
 #### P2-T7: 勝利条件 80% + 影響マップ都市重み
 - **入力**: DESIGN.md §1.1, §8.1。**依存: P2-T2**
-- **作業**: `evaluate-game-end.ts` の domination 判定を 80% 閾値に変更。`influence-map.ts` に都市位置への重み加算（city_weight=300）を追加。
+- **作業**: `evaluate-game-end.ts` の domination 判定を 80% 閾値に変更。`influence-map.ts` の都市重み（city_weight=300）は P2-T4.1 で実装済みのため確認のみ。
 - **ディレクトリ**: `packages/core`（1 ディレクトリ）
 - **見積**: 1.5h
 
