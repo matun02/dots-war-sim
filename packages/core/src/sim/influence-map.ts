@@ -8,7 +8,37 @@ export interface InfluenceData {
 
 const LIGHT_WEIGHT = 100;
 const HEAVY_WEIGHT = 200;
-const DIFFUSION_ITERATIONS = 3;
+const CITY_WEIGHT = 300;
+const INFLUENCE_RADIUS = 10;
+const INFLUENCE_RADIUS_SQ = INFLUENCE_RADIUS * INFLUENCE_RADIUS;
+const SMOOTH_ITERATIONS = 3;
+
+function addCircularInfluence(
+  map: Int16Array,
+  cx: number,
+  cy: number,
+  weight: number,
+  width: number,
+  height: number,
+): void {
+  const minY = Math.max(0, cy - INFLUENCE_RADIUS);
+  const maxY = Math.min(height - 1, cy + INFLUENCE_RADIUS);
+  const minX = Math.max(0, cx - INFLUENCE_RADIUS);
+  const maxX = Math.min(width - 1, cx + INFLUENCE_RADIUS);
+
+  for (let y = minY; y <= maxY; y++) {
+    const dy = y - cy;
+    for (let x = minX; x <= maxX; x++) {
+      const dx = x - cx;
+      const distSq = dx * dx + dy * dy;
+      if (distSq > INFLUENCE_RADIUS_SQ) continue;
+      const falloff = Math.floor(
+        (weight * (INFLUENCE_RADIUS_SQ - distSq)) / INFLUENCE_RADIUS_SQ,
+      );
+      map[y * width + x] = (map[y * width + x]! + falloff) as Int16Array[number];
+    }
+  }
+}
 
 export function computeInfluenceMap(state: GameState): InfluenceData {
   const { width, height } = state.map;
@@ -24,15 +54,23 @@ export function computeInfluenceMap(state: GameState): InfluenceData {
     const px = Math.floor(unit.pos.x);
     const py = Math.floor(unit.pos.y);
     if (px >= 0 && px < width && py >= 0 && py < height) {
-      const idx = py * width + px;
-      const playerMap = maps[unit.owner as number]!;
-      playerMap[idx]! += unit.kind === 'heavy' ? HEAVY_WEIGHT : LIGHT_WEIGHT;
+      const w = unit.kind === 'heavy' ? HEAVY_WEIGHT : LIGHT_WEIGHT;
+      addCircularInfluence(maps[unit.owner as number]!, px, py, w, width, height);
+    }
+  }
+
+  for (const city of state.cities) {
+    if (city.owner === null) continue;
+    const cx = Math.floor(city.pos.x);
+    const cy = Math.floor(city.pos.y);
+    if (cx >= 0 && cx < width && cy >= 0 && cy < height) {
+      addCircularInfluence(maps[city.owner as number]!, cx, cy, CITY_WEIGHT, width, height);
     }
   }
 
   const next = new Int16Array(size);
   for (let p = 0; p < playerCount; p++) {
-    for (let iter = 0; iter < DIFFUSION_ITERATIONS; iter++) {
+    for (let iter = 0; iter < SMOOTH_ITERATIONS; iter++) {
       const current = maps[p]!;
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {

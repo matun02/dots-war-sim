@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type {
+  City,
   GameState,
   PlayerId,
   EntityId,
@@ -117,17 +118,26 @@ describe('computeInfluenceMap', () => {
   });
 
   it('diffuses values to neighbors with decay over distance', () => {
+    const bigMap: MapDef = {
+      id: 'test-decay',
+      width: 32,
+      height: 24,
+      terrain: new Array(32 * 24).fill(0),
+      cities: [],
+      spawns: [],
+    };
     const state = makeState({
+      map: bigMap,
       units: [
-        makeUnit({ owner: 0 as PlayerId, pos: { x: 4, y: 3 } }),
+        makeUnit({ owner: 0 as PlayerId, pos: { x: 16, y: 12 } }),
       ],
     });
     const data = computeInfluenceMap(state);
     const map0 = data.maps[0]!;
 
-    const center = map0[3 * 8 + 4]!;
-    const adj = map0[3 * 8 + 5]!;
-    const far = map0[3 * 8 + 7]!;
+    const center = map0[12 * 32 + 16]!;
+    const adj = map0[12 * 32 + 17]!;
+    const far = map0[12 * 32 + 28]!;
 
     expect(center).toBeGreaterThan(adj);
     expect(adj).toBeGreaterThan(far);
@@ -153,10 +163,10 @@ describe('computeInfluenceMap', () => {
     const map1 = data.maps[1]!;
 
     expect(map0[1 * 8 + 1]).toBeGreaterThan(0);
-    expect(map1[1 * 8 + 1]).toBe(0);
+    expect(map0[1 * 8 + 1]).toBeGreaterThan(map1[1 * 8 + 1]!);
 
     expect(map1[4 * 8 + 6]).toBeGreaterThan(0);
-    expect(map0[4 * 8 + 6]).toBe(0);
+    expect(map1[4 * 8 + 6]).toBeGreaterThan(map0[4 * 8 + 6]!);
   });
 
   it('is deterministic: same input produces same output', () => {
@@ -235,6 +245,70 @@ describe('computeInfluenceMap', () => {
       }
     }
   });
+
+  it('spreads influence to distant cells with 10 iterations', () => {
+    const bigMap: MapDef = {
+      id: 'test-big',
+      width: 24,
+      height: 16,
+      terrain: new Array(24 * 16).fill(0),
+      cities: [],
+      spawns: [],
+    };
+    const state = makeState({
+      map: bigMap,
+      units: [
+        makeUnit({
+          id: 1 as EntityId,
+          owner: 0 as PlayerId,
+          pos: { x: 12, y: 8 },
+        }),
+      ],
+    });
+    const data = computeInfluenceMap(state);
+    const map0 = data.maps[0]!;
+    const dist5Idx = 8 * 24 + 7; // 5 cells away from center (12-5=7)
+    expect(map0[dist5Idx]).toBeGreaterThan(0);
+  });
+
+  it('adds city weight to owner influence', () => {
+    const city: City = {
+      id: 0 as CityId,
+      pos: { x: 4, y: 3 },
+      owner: 0 as PlayerId,
+      production: 'light',
+      produceCooldownTicks: 0,
+      captureProgressTicks: 0,
+      capturingPlayer: null,
+      supplyUsed: 0,
+    };
+    const stateWithCity = makeState({ cities: [city] });
+    const stateWithout = makeState({ cities: [] });
+    const dataWith = computeInfluenceMap(stateWithCity);
+    const dataWithout = computeInfluenceMap(stateWithout);
+    const centerIdx = 3 * 8 + 4;
+    expect(dataWith.maps[0]![centerIdx]).toBeGreaterThan(
+      dataWithout.maps[0]![centerIdx]!,
+    );
+  });
+
+  it('does not add city weight for neutral cities', () => {
+    const neutralCity: City = {
+      id: 0 as CityId,
+      pos: { x: 4, y: 3 },
+      owner: null,
+      production: 'light',
+      produceCooldownTicks: 0,
+      captureProgressTicks: 0,
+      capturingPlayer: null,
+      supplyUsed: 0,
+    };
+    const state = makeState({ cities: [neutralCity] });
+    const data = computeInfluenceMap(state);
+    const centerIdx = 3 * 8 + 4;
+    expect(data.maps[0]![centerIdx]).toBe(0);
+    expect(data.maps[1]![centerIdx]).toBe(0);
+  });
 });
 
 describe('computeInfluenceDiff', () => {
@@ -264,5 +338,35 @@ describe('computeInfluenceDiff', () => {
     for (let i = 0; i < diff.length; i++) {
       expect(diff[i]).toBe(map0[i]! - map1[i]!);
     }
+  });
+
+  it('produces zero contour near midpoint for symmetric opposing units on large map', () => {
+    const bigMap: MapDef = {
+      id: 'test-sym',
+      width: 24,
+      height: 12,
+      terrain: new Array(24 * 12).fill(0),
+      cities: [],
+      spawns: [],
+    };
+    const state = makeState({
+      map: bigMap,
+      units: [
+        makeUnit({
+          id: 1 as EntityId,
+          owner: 0 as PlayerId,
+          pos: { x: 4, y: 6 },
+        }),
+        makeUnit({
+          id: 2 as EntityId,
+          owner: 1 as PlayerId,
+          pos: { x: 20, y: 6 },
+        }),
+      ],
+    });
+    const data = computeInfluenceMap(state);
+    const diff = computeInfluenceDiff(data, 0 as PlayerId, 1 as PlayerId);
+    const midIdx = 6 * 24 + 12;
+    expect(Math.abs(diff[midIdx]!)).toBeLessThanOrEqual(1);
   });
 });

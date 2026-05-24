@@ -275,6 +275,8 @@ describe('AIController', () => {
 
   it('issues set-production command when frontline is stable and cities >= 3', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
+    // AI must dominate everywhere so enemyPressure=0 (city weight also contributes).
+    // Place AI units near the enemy city so AI influence overwhelms enemy city influence.
     const state = makeState(0, [
       makeCity(0, 10, 18, AI_PLAYER),
       makeCity(1, 15, 18, AI_PLAYER),
@@ -282,6 +284,12 @@ describe('AIController', () => {
       makeCity(3, 55, 18, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 10, 18),
+      makeUnit(1, AI_PLAYER, 50, 18),
+      makeUnit(2, AI_PLAYER, 54, 18),
+      makeUnit(3, AI_PLAYER, 55, 18),
+      makeUnit(4, AI_PLAYER, 56, 18),
+      makeUnit(5, AI_PLAYER, 55, 16),
+      makeUnit(6, AI_PLAYER, 55, 20),
     ]);
 
     const cmds = ai.update(state);
