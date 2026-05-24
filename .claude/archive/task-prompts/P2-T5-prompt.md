@@ -3,13 +3,14 @@
 特に CLAUDE.md §7.2（2ディレクトリ制限）を厳密に守ること。
 
 ## 現在の状態
-- M3 完了。Phase 1 全完了。P2-T1〜T4 完了。
-  - commit `{P2-T1のcommit}`: heavy ユニット実装
-  - commit `{P2-T2のcommit}`: 影響マップ実装
-  - commit `{P2-T3のcommit}`: AI v1 実装
-  - commit `{P2-T4のcommit}`: 前線描画実装
+- M3 完了。Phase 1 全完了。P2-T1〜T4.1 完了。
+  - commit `a6e6beb`: P2-T1 heavy ユニット実装
+  - commit `ff1390f`: P2-T2 影響マップ実装
+  - commit `dc97deb`: P2-T3 AI v1 実装
+  - commit `41c8257`: P2-T4 前線描画（マーチングスクエア）
+  - commit `1816f95`: P2-T4.1 前線・領土システム再設計（初期配置+円形フォールオフ+都市重み）
 - `pnpm install`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm lint` すべて green。
-- テスト件数: 合計 {P2-T4完了後の件数} 件。
+- テスト件数: core 133 + maps 8 + web 36 = 合計 177 件。
 
 ### マップ関連の既存実装状態
 
@@ -231,6 +232,14 @@ feat(maps): add 4 new maps with map selection UI (P2-T5)
 
 [本文に変更要点を簡潔に]
 
-コミット前に `pnpm -r typecheck && pnpm -r test && pnpm lint` を必ず通すこと。
+コミット前の必須チェック（★MUST）: `.claude/skills/skill-pre-commit-check.md` に従い、セルフレビュー → 自動テスト → ウェブテスト の全ステップを実施すること。
+
+ウェブテスト確認項目:
+- タイトル画面でマップ選択 UI が表示される
+- 各マップを選択して Start Game → ゲームが正常に開始される
+- 各マップの地形（水域、山脈、森）が意図通りに描画される
+- ユニット・AI・前線が各マップで正常に動作する
+- コンソールにエラーが出ていない
+
 コミット後に `git push` すること。
 完了後に `.claude/skills/skill-task-completion.md` に従い TASKS.md / CLAUDE.md を更新してコミット・push すること。
