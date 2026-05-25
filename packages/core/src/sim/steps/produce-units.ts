@@ -4,7 +4,6 @@ import { SUPPLY_MAX, UNIT_STATS } from '../constants.js';
 
 export function produceUnits(state: GameState, _rng: Rng): void {
   for (const city of state.cities) {
-    if (city.owner === null) continue;
     if (city.capturingPlayer !== null) continue;
     const kind = city.production;
     const stats = UNIT_STATS[kind];

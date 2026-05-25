@@ -40,7 +40,7 @@ describe('loadMap', () => {
     expect(map.width).toBe(64);
     expect(map.height).toBe(36);
     expect(map.terrain).toHaveLength(64 * 36);
-    expect(map.cities).toHaveLength(5);
+    expect(map.cities).toHaveLength(8);
     expect(map.spawns).toHaveLength(2);
   });
 

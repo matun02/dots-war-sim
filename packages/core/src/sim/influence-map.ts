@@ -60,7 +60,6 @@ export function computeInfluenceMap(state: GameState): InfluenceData {
   }
 
   for (const city of state.cities) {
-    if (city.owner === null) continue;
     const cx = Math.floor(city.pos.x);
     const cy = Math.floor(city.pos.y);
     if (cx >= 0 && cx < width && cy >= 0 && cy < height) {

@@ -6,7 +6,7 @@ const PLAYER_COLORS: Record<number, number> = {
   1: 0xff8844, // orange
 };
 
-const NEUTRAL_COLOR = 0x888888;
+const FALLBACK_COLOR = 0xffffff;
 
 export function createCityRenderer(
   app: Application,
@@ -38,10 +38,7 @@ export function createCityRenderer(
         const cx = city.pos.x * cellPx + cellPx / 2;
         const cy = city.pos.y * cellPx + cellPx / 2;
 
-        const borderColor =
-          city.owner !== null
-            ? (PLAYER_COLORS[city.owner] ?? NEUTRAL_COLOR)
-            : NEUTRAL_COLOR;
+        const borderColor = PLAYER_COLORS[city.owner] ?? FALLBACK_COLOR;
 
         g.circle(cx, cy, radius);
         g.fill(0xffffff);

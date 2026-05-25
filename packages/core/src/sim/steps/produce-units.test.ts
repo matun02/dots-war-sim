@@ -66,14 +66,6 @@ describe('produceUnits', () => {
     expect(state.units).toHaveLength(0);
   });
 
-  it('does not produce from neutral cities (owner = null)', () => {
-    const city = makeCity({ owner: null });
-    const state = makeState([city]);
-
-    produceUnits(state, rng);
-    expect(state.units).toHaveLength(0);
-  });
-
   it('decrements produceCooldownTicks correctly', () => {
     const city = makeCity({ produceCooldownTicks: 3 });
     const state = makeState([city]);

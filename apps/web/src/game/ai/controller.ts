@@ -28,8 +28,6 @@ const DIFFICULTY_CONFIG: Record<AIDifficulty, AIConfig> = {
 };
 
 const DEFENSE_RADIUS = 15;
-const NEUTRAL_WEIGHT = 1.5;
-const ENEMY_WEIGHT = 1.0;
 const INFLUENCE_INTERVAL = 5;
 const ECONOMY_DISADVANTAGE_THRESHOLD = 0.4;
 const HEAVY_PRODUCTION_MIN_CITIES = 3;
@@ -92,15 +90,7 @@ export function createAIController(
           : 0.5;
 
       if (economyRatio < ECONOMY_DISADVANTAGE_THRESHOLD) {
-        handleEconomyExpansion(
-          state,
-          playerId,
-          myUnits,
-          available,
-          config,
-          rng,
-          commands,
-        );
+        handleOffense(state, playerId, myUnits, available, config, rng, commands);
       } else {
         handleFrontlinePush(
           state,
@@ -186,44 +176,6 @@ function handleOffense(
   });
 }
 
-function handleEconomyExpansion(
-  state: GameState,
-  playerId: PlayerId,
-  myUnits: Unit[],
-  idleUnits: Unit[],
-  config: AIConfig,
-  rng: Rng,
-  commands: Command[],
-): void {
-  const avgPos = computeCenter(state, playerId, myUnits);
-  if (avgPos === null) return;
-
-  const neutralTargets = state.cities
-    .filter((c) => c.owner === null)
-    .map((c) => {
-      const dist = Math.hypot(c.pos.x - avgPos.x, c.pos.y - avgPos.y);
-      const score = dist > 0 ? (1 / dist) * NEUTRAL_WEIGHT : NEUTRAL_WEIGHT;
-      return { pos: c.pos, score, id: c.id };
-    })
-    .sort((a, b) => b.score - a.score || a.id - b.id);
-
-  const target = neutralTargets[0];
-  if (target === undefined) {
-    handleOffense(state, playerId, myUnits, idleUnits, config, rng, commands);
-    return;
-  }
-
-  const selectedIds = selectUnits(idleUnits, config, rng);
-  if (selectedIds.length === 0) return;
-
-  commands.push({
-    type: 'move',
-    player: playerId,
-    ids: selectedIds,
-    to: target.pos,
-  });
-}
-
 function handleFrontlinePush(
   state: GameState,
   playerId: PlayerId,
@@ -287,7 +239,7 @@ function getSectorTarget(
   mapHeight: number,
 ): Vec2 {
   const enemyCitiesInSector = state.cities.filter((c) => {
-    if (c.owner === playerId || c.owner === null) return false;
+    if (c.owner === playerId) return false;
     const midX = mapWidth / 2;
     const midY = mapHeight / 2;
     switch (sector) {
@@ -414,8 +366,7 @@ function scoreTargets(
   for (const c of cities) {
     if (c.owner === playerId) continue;
     const dist = Math.hypot(c.pos.x - avgPos.x, c.pos.y - avgPos.y);
-    const weight = c.owner === null ? NEUTRAL_WEIGHT : ENEMY_WEIGHT;
-    const score = dist > 0 ? (1 / dist) * weight : weight;
+    const score = dist > 0 ? 1 / dist : 1;
     targets.push({ pos: c.pos, score, id: c.id });
   }
   targets.sort((a, b) => b.score - a.score || a.id - b.id);

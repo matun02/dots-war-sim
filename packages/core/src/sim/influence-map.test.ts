@@ -292,23 +292,6 @@ describe('computeInfluenceMap', () => {
     );
   });
 
-  it('does not add city weight for neutral cities', () => {
-    const neutralCity: City = {
-      id: 0 as CityId,
-      pos: { x: 4, y: 3 },
-      owner: null,
-      production: 'light',
-      produceCooldownTicks: 0,
-      captureProgressTicks: 0,
-      capturingPlayer: null,
-      supplyUsed: 0,
-    };
-    const state = makeState({ cities: [neutralCity] });
-    const data = computeInfluenceMap(state);
-    const centerIdx = 3 * 8 + 4;
-    expect(data.maps[0]![centerIdx]).toBe(0);
-    expect(data.maps[1]![centerIdx]).toBe(0);
-  });
 });
 
 describe('computeInfluenceDiff', () => {

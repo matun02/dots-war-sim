@@ -30,7 +30,7 @@ export interface Player {
 export interface City {
   id: CityId;
   pos: Vec2;
-  owner: PlayerId | null;
+  owner: PlayerId;
   production: UnitKind;
   produceCooldownTicks: number;
   captureProgressTicks: number;
@@ -55,7 +55,7 @@ export interface MapDef {
   width: number;
   height: number;
   terrain: number[];
-  cities: Readonly<Pick<City, 'id' | 'pos' | 'production'>>[];
+  cities: Readonly<Pick<City, 'id' | 'pos' | 'production'> & { owner?: PlayerId }>[];
   spawns: { player: PlayerId; cityId: CityId }[];
 }
 

@@ -15,7 +15,7 @@ export function hashState(state: GameState): number {
 
   const sortedCities = state.cities.slice().sort((a, b) => a.id - b.id);
   for (const c of sortedCities) {
-    const owner = c.owner === null ? -1 : (c.owner as number) | 0;
+    const owner = (c.owner as number) | 0;
     const supply = c.supplyUsed | 0;
     h ^= ((owner * 56843189) ^ (supply * 15485863)) | 0;
   }

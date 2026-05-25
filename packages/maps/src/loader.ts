@@ -54,6 +54,7 @@ export function loadMap(json: unknown): MapDef {
       id: c.id as CityId,
       pos: c.pos,
       production: c.production,
+      ...(c.owner !== undefined ? { owner: c.owner as PlayerId } : {}),
     })),
     spawns: spawns.map((s) => ({
       player: s.player as PlayerId,

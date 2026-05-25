@@ -10,8 +10,7 @@ import type {
   MapDef,
 } from '../types.js';
 import {
-  CAPTURE_NEUTRALIZE_TICKS,
-  CAPTURE_CLAIM_TICKS,
+  CAPTURE_TICKS,
   POST_CAPTURE_COOLDOWN_TICKS,
 } from '../constants.js';
 
@@ -78,36 +77,35 @@ function makeState(cities: City[], units: Unit[]): GameState {
 }
 
 describe('updateCityCapture', () => {
-  it('neutralizes enemy city after CAPTURE_NEUTRALIZE_TICKS', () => {
+  it('captures enemy city after CAPTURE_TICKS (direct flip)', () => {
     const city = makeCity({ id: cid(0), owner: pid(0) });
     const unit = makeUnit(eid(0), pid(1), { x: 5, y: 5 });
     const state = makeState([city], [unit]);
 
-    for (let i = 0; i < CAPTURE_NEUTRALIZE_TICKS; i++) {
-      updateCityCapture(state);
-    }
-
-    expect(state.cities[0]!.owner).toBeNull();
-  });
-
-  it('claims neutral city after CAPTURE_CLAIM_TICKS', () => {
-    const city = makeCity({ id: cid(0), owner: null });
-    const unit = makeUnit(eid(0), pid(1), { x: 5, y: 5 });
-    const state = makeState([city], [unit]);
-
-    for (let i = 0; i < CAPTURE_CLAIM_TICKS; i++) {
+    for (let i = 0; i < CAPTURE_TICKS; i++) {
       updateCityCapture(state);
     }
 
     expect(state.cities[0]!.owner).toBe(pid(1));
   });
 
-  it('sets produceCooldownTicks after capture', () => {
-    const city = makeCity({ id: cid(0), owner: null });
+  it('keeps original owner during capture progress (no intermediate state)', () => {
+    const city = makeCity({ id: cid(0), owner: pid(0) });
     const unit = makeUnit(eid(0), pid(1), { x: 5, y: 5 });
     const state = makeState([city], [unit]);
 
-    for (let i = 0; i < CAPTURE_CLAIM_TICKS; i++) {
+    for (let i = 0; i < CAPTURE_TICKS - 1; i++) {
+      updateCityCapture(state);
+      expect(state.cities[0]!.owner).toBe(pid(0));
+    }
+  });
+
+  it('sets produceCooldownTicks after capture', () => {
+    const city = makeCity({ id: cid(0), owner: pid(0) });
+    const unit = makeUnit(eid(0), pid(1), { x: 5, y: 5 });
+    const state = makeState([city], [unit]);
+
+    for (let i = 0; i < CAPTURE_TICKS; i++) {
       updateCityCapture(state);
     }
 
@@ -150,20 +148,17 @@ describe('updateCityCapture', () => {
   });
 
   it('resets capture progress when owner units reclaim the tile', () => {
-    // Enemy had built up 50/60 ticks of capture progress
     const city = makeCity({
       id: cid(0),
       owner: pid(0),
       captureProgressTicks: 50,
       capturingPlayer: pid(1),
     });
-    // Now only the owner's units are on the tile (defender reclaimed)
     const unit = makeUnit(eid(0), pid(0), { x: 5, y: 5 });
     const state = makeState([city], [unit]);
 
     updateCityCapture(state);
 
-    // Progress must be fully reset — enemy can't resume from 50 later
     expect(state.cities[0]!.captureProgressTicks).toBe(0);
     expect(state.cities[0]!.capturingPlayer).toBeNull();
     expect(state.cities[0]!.owner).toBe(pid(0));

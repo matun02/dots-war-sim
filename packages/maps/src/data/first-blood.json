@@ -2311,43 +2311,49 @@
   "cities": [
     {
       "id": 0,
-      "pos": {
-        "x": 10,
-        "y": 8
-      },
+      "pos": { "x": 10, "y": 8 },
       "production": "light"
     },
     {
       "id": 1,
-      "pos": {
-        "x": 54,
-        "y": 28
-      },
+      "pos": { "x": 54, "y": 28 },
       "production": "light"
     },
     {
       "id": 2,
-      "pos": {
-        "x": 32,
-        "y": 5
-      },
-      "production": "light"
+      "pos": { "x": 32, "y": 5 },
+      "production": "light",
+      "owner": 0
     },
     {
       "id": 3,
-      "pos": {
-        "x": 32,
-        "y": 30
-      },
-      "production": "light"
+      "pos": { "x": 32, "y": 30 },
+      "production": "light",
+      "owner": 1
     },
     {
       "id": 4,
-      "pos": {
-        "x": 32,
-        "y": 17
-      },
-      "production": "light"
+      "pos": { "x": 4, "y": 18 },
+      "production": "light",
+      "owner": 0
+    },
+    {
+      "id": 5,
+      "pos": { "x": 14, "y": 27 },
+      "production": "light",
+      "owner": 0
+    },
+    {
+      "id": 6,
+      "pos": { "x": 60, "y": 18 },
+      "production": "light",
+      "owner": 1
+    },
+    {
+      "id": 7,
+      "pos": { "x": 50, "y": 9 },
+      "production": "light",
+      "owner": 1
     }
   ],
   "spawns": [

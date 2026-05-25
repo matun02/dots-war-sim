@@ -7,6 +7,7 @@ const CitySchema = v.object({
     y: v.number(),
   }),
   production: v.picklist(['light', 'heavy']),
+  owner: v.optional(v.number()),
 });
 
 const SpawnSchema = v.object({

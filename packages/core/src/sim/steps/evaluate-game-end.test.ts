@@ -31,7 +31,7 @@ const dummyMap: MapDef = {
 };
 
 function makeCity(
-  overrides: Partial<City> & { id: CityId; owner: PlayerId | null },
+  overrides: Partial<City> & { id: CityId; owner: PlayerId },
 ): City {
   return {
     pos: { x: 0, y: 0 },
@@ -89,11 +89,11 @@ describe('evaluateGameEnd', () => {
     expect(state.players[1]!.alive).toBe(false);
   });
 
-  it('keeps player alive if they have units but no cities', () => {
+  it('keeps player alive if they have units but fewer cities', () => {
     const state = makeState({
       cities: [
         makeCity({ id: cid(0), owner: pid(0) }),
-        makeCity({ id: cid(1), owner: null }),
+        makeCity({ id: cid(1), owner: pid(1) }),
       ],
       units: [
         makeUnit({ id: eid(0), owner: pid(0) }),
@@ -129,11 +129,11 @@ describe('evaluateGameEnd', () => {
     });
   });
 
-  it('triggers annihilation victory when only one player is alive', () => {
+  it('triggers domination when last opponent loses all cities and units', () => {
     const state = makeState({
       cities: [
         makeCity({ id: cid(0), owner: pid(0) }),
-        makeCity({ id: cid(1), owner: null }),
+        makeCity({ id: cid(1), owner: pid(0) }),
       ],
       units: [makeUnit({ id: eid(0), owner: pid(0) })],
     });
@@ -144,7 +144,7 @@ describe('evaluateGameEnd', () => {
     expect(state.result).toEqual({
       type: 'victory',
       winner: pid(0),
-      reason: 'annihilation',
+      reason: 'domination',
     });
   });
 

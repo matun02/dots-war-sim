@@ -11,7 +11,7 @@ function makeTestMap(): MapDef {
     cities: [
       { id: 0 as CityId, pos: { x: 1, y: 1 }, production: 'light' as const },
       { id: 1 as CityId, pos: { x: 3, y: 3 }, production: 'light' as const },
-      { id: 2 as CityId, pos: { x: 2, y: 2 }, production: 'heavy' as const },
+      { id: 2 as CityId, pos: { x: 2, y: 2 }, production: 'heavy' as const, owner: 0 as PlayerId },
     ],
     spawns: [
       { player: 0 as PlayerId, cityId: 0 as CityId },
@@ -37,7 +37,7 @@ function makeLargeTestMap(): MapDef {
     cities: [
       { id: 0 as CityId, pos: { x: 10, y: 8 }, production: 'light' as const },
       { id: 1 as CityId, pos: { x: 54, y: 28 }, production: 'light' as const },
-      { id: 2 as CityId, pos: { x: 32, y: 5 }, production: 'light' as const },
+      { id: 2 as CityId, pos: { x: 32, y: 5 }, production: 'light' as const, owner: 0 as PlayerId },
     ],
     spawns: [
       { player: 0 as PlayerId, cityId: 0 as CityId },
@@ -71,10 +71,18 @@ describe('createInitialState', () => {
     expect(city1.owner).toBe(1);
   });
 
-  it('leaves non-spawn cities as neutral (owner = null)', () => {
+  it('assigns owner from map data for non-spawn cities', () => {
     const state = createInitialState(makeTestMap(), makePlayers(), 42);
     const city2 = state.cities.find((c) => c.id === (2 as CityId))!;
-    expect(city2.owner).toBeNull();
+    expect(city2.owner).toBe(0);
+  });
+
+  it('assigns all cities an owner (no null)', () => {
+    const state = createInitialState(makeLargeTestMap(), makePlayers(), 42);
+    for (const city of state.cities) {
+      expect(city.owner).not.toBeNull();
+      expect(typeof city.owner).toBe('number');
+    }
   });
 
   it('places initial units for each player', () => {
@@ -139,16 +147,30 @@ describe('createInitialState', () => {
     }
   });
 
+  it('uses ratio-based formation offset (40% of spawn-to-enemy distance)', () => {
+    const map = makeLargeTestMap();
+    const state = createInitialState(map, makePlayers(), 42);
+    const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
+
+    // spawn(10,8) → enemy(54,28): dist ≈ 47.2, offset ≈ 18.9
+    // center ≈ (10 + 0.93*18.9, 8 + 0.42*18.9) ≈ (27.6, 16.0)
+    const avgX = p0Units.reduce((s, u) => s + u.pos.x, 0) / p0Units.length;
+    const avgY = p0Units.reduce((s, u) => s + u.pos.y, 0) / p0Units.length;
+
+    // Formation center should be ~40% of the way from spawn to enemy
+    // Spawn at x=10, enemy at x=54 → 40% offset ≈ x=27.6
+    expect(avgX).toBeGreaterThan(20);
+    expect(avgX).toBeLessThan(35);
+    expect(avgY).toBeGreaterThan(10);
+    expect(avgY).toBeLessThan(22);
+  });
+
   it('places units in a formation (approximately linear)', () => {
     const map = makeLargeTestMap();
     const state = createInitialState(map, makePlayers(), 42);
     const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
 
-    // P0 spawn at (10,8), enemy at (54,28): dx=44, dy=20
-    // |dx|=44 > |dy|*2=40 → perpendicular is roughly Y-axis
-    // Units should be spread along Y-axis (perp to attack direction)
     const ys = p0Units.map((u) => u.pos.y).sort((a, b) => a - b);
-    // Check units are roughly equally spaced (within tolerance)
     for (let i = 1; i < ys.length; i++) {
       const gap = ys[i]! - ys[i - 1]!;
       expect(gap).toBeCloseTo(1.5, 0);
@@ -160,8 +182,6 @@ describe('createInitialState', () => {
     const state = createInitialState(map, makePlayers(), 42);
     const p0Units = state.units.filter((u) => u.owner === (0 as PlayerId));
 
-    // Spawn city at x=10, enemy at x=54
-    // Units should be placed ahead (x > 10)
     const avgX =
       p0Units.reduce((sum, u) => sum + u.pos.x, 0) / p0Units.length;
     expect(avgX).toBeGreaterThan(10);
@@ -178,9 +198,7 @@ describe('createInitialState', () => {
     const p1AvgX =
       p1Units.reduce((sum, u) => sum + u.pos.x, 0) / p1Units.length;
 
-    // P0 units should be to the left of P1 units
     expect(p0AvgX).toBeLessThan(p1AvgX);
-    // P0 units ahead of spawn (x=10), P1 units behind spawn (x=54)
     expect(p0AvgX).toBeGreaterThan(10);
     expect(p1AvgX).toBeLessThan(54);
   });

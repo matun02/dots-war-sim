@@ -39,13 +39,13 @@ function makeCity(
   id: number,
   x: number,
   y: number,
-  owner: number | null,
+  owner: number,
   captureProgressTicks = 0,
 ): City {
   return {
     id: id as CityId,
     pos: { x, y },
-    owner: owner === null ? null : (owner as PlayerId),
+    owner: owner as PlayerId,
     production: 'light',
     produceCooldownTicks: 0,
     captureProgressTicks,
@@ -84,11 +84,11 @@ function makeState(
 }
 
 describe('AIController', () => {
-  it('dispatches idle units to a neutral city', () => {
+  it('dispatches idle units to an enemy city', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
     const state = makeState(0, [
       makeCity(0, 10, 10, AI_PLAYER),
-      makeCity(1, 30, 10, null),
+      makeCity(1, 30, 10, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 10, 10),
       makeUnit(1, AI_PLAYER, 11, 10),
@@ -109,7 +109,7 @@ describe('AIController', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
     const state = makeState(0, [
       makeCity(0, 10, 10, AI_PLAYER),
-      makeCity(1, 30, 10, null),
+      makeCity(1, 30, 10, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 10, 10, { x: 30, y: 10 }),
       makeUnit(1, AI_PLAYER, 11, 10, { x: 30, y: 10 }),
@@ -124,7 +124,7 @@ describe('AIController', () => {
     const ai = createAIController(AI_PLAYER, 'normal', new Rng(1));
     const state = makeState(1, [
       makeCity(0, 10, 10, AI_PLAYER),
-      makeCity(1, 30, 10, null),
+      makeCity(1, 30, 10, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 10, 10),
     ]);
@@ -144,7 +144,7 @@ describe('AIController', () => {
       );
       const state = makeState(0, [
         makeCity(0, 10, 10, AI_PLAYER),
-        makeCity(1, 50, 10, null),
+        makeCity(1, 50, 10, HUMAN_PLAYER),
       ], units);
 
       const cmds = ai.update(state);
@@ -161,7 +161,7 @@ describe('AIController', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
     const state = makeState(0, [
       makeCity(0, 10, 10, AI_PLAYER, 5),
-      makeCity(1, 50, 10, null),
+      makeCity(1, 50, 10, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 12, 10),
       makeUnit(1, AI_PLAYER, 13, 10),
@@ -179,7 +179,7 @@ describe('AIController', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
     const state = makeState(0, [
       makeCity(0, 10, 10, AI_PLAYER),
-      makeCity(1, 30, 10, null),
+      makeCity(1, 30, 10, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 10, 10),
     ]);
@@ -194,7 +194,7 @@ describe('AIController', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
     const state = makeState(0, [
       makeCity(0, 10, 10, AI_PLAYER),
-      makeCity(1, 30, 10, null),
+      makeCity(1, 30, 10, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 10, 10),
       makeUnit(1, HUMAN_PLAYER, 20, 10),
@@ -210,7 +210,7 @@ describe('AIController', () => {
   it('is deterministic: same state + same seed produces same commands', () => {
     const state = makeState(0, [
       makeCity(0, 10, 10, AI_PLAYER),
-      makeCity(1, 30, 10, null),
+      makeCity(1, 30, 10, HUMAN_PLAYER),
       makeCity(2, 50, 20, HUMAN_PLAYER),
     ], [
       makeUnit(0, AI_PLAYER, 10, 10),
@@ -251,14 +251,13 @@ describe('AIController', () => {
     }
   });
 
-  it('prioritizes neutral cities when economy is disadvantaged', () => {
+  it('attacks enemy cities when economy is disadvantaged', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
     const state = makeState(0, [
       makeCity(0, 10, 18, AI_PLAYER),
       makeCity(1, 50, 5, HUMAN_PLAYER),
       makeCity(2, 50, 30, HUMAN_PLAYER),
       makeCity(3, 55, 18, HUMAN_PLAYER),
-      makeCity(4, 30, 18, null),
     ], [
       makeUnit(0, AI_PLAYER, 10, 18),
       makeUnit(1, AI_PLAYER, 12, 18),
@@ -269,14 +268,12 @@ describe('AIController', () => {
     const moveCmd = cmds.find((c) => c.type === 'move');
     expect(moveCmd).toBeDefined();
     if (moveCmd && moveCmd.type === 'move') {
-      expect(moveCmd.to).toEqual({ x: 30, y: 18 });
+      expect(moveCmd.to.x).toBeGreaterThan(10);
     }
   });
 
   it('issues set-production command when frontline is stable and cities >= 3', () => {
     const ai = createAIController(AI_PLAYER, 'hard', new Rng(1));
-    // AI must dominate everywhere so enemyPressure=0 (city weight also contributes).
-    // Place AI units near the enemy city so AI influence overwhelms enemy city influence.
     const state = makeState(0, [
       makeCity(0, 10, 18, AI_PLAYER),
       makeCity(1, 15, 18, AI_PLAYER),

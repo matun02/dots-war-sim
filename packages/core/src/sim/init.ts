@@ -6,13 +6,14 @@ import type {
   GameState,
   MapDef,
   Player,
+  PlayerId,
   Unit,
 } from './types.js';
 
 const UNITS_PER_PLAYER = 10;
 const TERRAIN_MOUNTAIN = 1;
 const TERRAIN_WATER = 3;
-const FORMATION_OFFSET = 5;
+const FORMATION_OFFSET_RATIO = 0.4;
 const FORMATION_SPACING = 1.5;
 
 function isImpassable(terrain: number): boolean {
@@ -37,7 +38,7 @@ export function createInitialState(
   const cities: City[] = map.cities.map((c) => ({
     id: c.id,
     pos: { x: c.pos.x, y: c.pos.y },
-    owner: spawnOwners.get(c.id) ?? null,
+    owner: spawnOwners.get(c.id) ?? c.owner ?? (0 as PlayerId),
     production: c.production,
     produceCooldownTicks: 0,
     captureProgressTicks: 0,
@@ -67,8 +68,9 @@ export function createInitialState(
     const perpX = -dirY;
     const perpY = dirX;
 
-    const centerX = spawnCity.pos.x + dirX * FORMATION_OFFSET;
-    const centerY = spawnCity.pos.y + dirY * FORMATION_OFFSET;
+    const formationOffset = dist * FORMATION_OFFSET_RATIO;
+    const centerX = spawnCity.pos.x + dirX * formationOffset;
+    const centerY = spawnCity.pos.y + dirY * formationOffset;
 
     let count = 0;
     const halfCount = (UNITS_PER_PLAYER - 1) / 2;
@@ -105,7 +107,7 @@ export function createInitialState(
           const distToCenter = Math.sqrt(
             (x - centerX) * (x - centerX) + (y - centerY) * (y - centerY),
           );
-          if (distToCenter < FORMATION_OFFSET * 2) {
+          if (distToCenter < formationOffset * 2) {
             candidates.push({ x, y });
           }
         }
