@@ -310,9 +310,9 @@ test(sim): add deterministic replay equivalence test
 
 | 日付 | バージョン | 変更 |
 |---|---|---|
+| 2026-05-25 | 1.0.23 | P2-T4.3 完了（中央配置・後方都市・中立削除・HP5倍）。`init.ts` 比率ベースオフセット(40%)、`first-blood.json` 後方都市4追加(計8)、`types.ts` City.ownerからnull排除、`update-city-capture.ts` 直接フリップ化(CAPTURE_TICKS=90)、HP 5倍(light:15, heavy:75)。テスト更新（合計 186 件） |
 | 2026-05-24 | 1.0.22 | P2-T4.2 完了（隊形配置・衝突分離・HP/サイズ3倍）。`init.ts` 方向ベクトル隊形配置、`separate-units.ts` SpatialHash衝突分離(SEPARATION_DIST=0.6)、HP 3倍(light:3, heavy:15)、描画半径3倍(light:0.75, heavy:1.05)。テスト 9 件追加（合計 186 件） |
 | 2026-05-24 | 1.0.21 | P2-T4.1 完了（前線・領土システム再設計）。`init.ts` 初期ユニット配置(10体/プレイヤー、自陣半分、山回避、Rng決定論)。`influence-map.ts` 円形フォールオフ(R=10)+都市重み(300)+3回平滑化に刷新。テスト 11 件追加（合計 177 件） |
-| 2026-05-24 | 1.0.20 | P2-T4 → T4.1 再設計タスク切り出し。ウェブテストで判明した問題（初期配置空、影響拡散狭、後方領土なし）の是正タスク。TASKS.md・DESIGN.md 設計見直し対象 |
 
 ---
 

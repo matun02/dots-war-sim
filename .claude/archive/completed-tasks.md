@@ -482,3 +482,33 @@
   - 隊形配置はRngを使わず純粋な幾何計算で実装可能。方向ベクトルの直交ベクトル(perpX=-dirY, perpY=dirX)で隊列方向を自動判定
   - 衝突分離のペア重複処理は pairKey = min*100000+max でO(1)判定。処理済みSetを使わないと各ペアが2回処理される
   - HP変更は既存テストの大半がUNIT_STATS定数参照なので影響が最小限。直接リテラルを使うテスト（hp:1で即死テスト等）はテスト固有値として残せる
+
+---
+
+## P2-T4.3: 中央配置・後方都市・中立削除・HP 5 倍 ✅ 完了 (2026-05-25, commit `7c496ff`)
+
+- **目的**: ウェブテストで判明した残課題（ユニット配置が端すぎる、後方都市不足、中立都市の不要性、HP不足）を一括解消。3ディレクトリ例外タスク。
+- **作業内容**:
+  1. `init.ts` — FORMATION_OFFSET固定値(5)を比率ベース(FORMATION_OFFSET_RATIO=0.4)に変更。spawn間距離の40%地点にユニットを配置し中央付近で対峙
+  2. `first-blood.json` — 中央都市(32,17)削除、後方都市4つ追加(id=4〜7, 各プレイヤー2都市)。計8都市(4/プレイヤー: spawn+front+2rear)
+  3. `types.ts` — City.ownerを`PlayerId | null`から`PlayerId`に変更。MapDef.citiesにoptional owner追加
+  4. `constants.ts` — CAPTURE_NEUTRALIZE_TICKS(60)+CAPTURE_CLAIM_TICKS(30)をCAPTURE_TICKS(90)に統合。HP 5倍(light:3→15, heavy:15→75)
+  5. `update-city-capture.ts` — 2段階(中立化→占領)を直接フリップ(enemy→captureProgress→owner変更)に簡略化
+  6. `produce-units.ts`, `influence-map.ts`, `hash.ts` — null ownerガード削除
+  7. `cities.ts`(render) — NEUTRAL_COLOR削除、null checks削除
+  8. `controller.ts`(AI) — NEUTRAL_WEIGHT・handleEconomyExpansion削除、scoreTargets簡略化
+  9. `schema.ts`, `loader.ts`(maps) — owner optional field追加
+  10. テスト7ファイル更新(evaluate-game-end, produce-units, influence-map, update-city-capture, init, controller, loader)
+- **成果物**: 既存 20 ファイル編集
+- **受け入れ基準**:
+  - [x] 初期ユニットがマップ中央付近で対峙する
+  - [x] first-bloodマップに8都市（各プレイヤー4都市）
+  - [x] City.ownerがnon-nullable（コンパイル時保証）
+  - [x] 占領が直接フリップ（中間null状態なし）
+  - [x] light HP=15, heavy HP=75
+  - [x] typecheck / lint / test 全 green（合計 186 件）
+- **実績**: 約2h
+- **学び**:
+  - 中立都市削除はCity.owner型変更が全パッケージに波及するため3ディレクトリ例外が必要。型駆動で漏れなく修正箇所を特定できる
+  - 2段階占領→直接フリップ化でコード量が大幅削減(43行→25行程度)。ゲームプレイ上も中間null状態がなくなりシンプルに
+  - annihilation勝利条件は2プレイヤー+null都市なし環境では到達不能(全都市がどちらかの所有→相手の都市0=自分が全都市所有→domination)。テストをdomination期待に変更
