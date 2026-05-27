@@ -13,8 +13,6 @@ import type {
 const UNITS_PER_PLAYER = 10;
 const TERRAIN_MOUNTAIN = 1;
 const TERRAIN_WATER = 3;
-const FORMATION_OFFSET_RATIO = 0.4;
-const FORMATION_SPACING = 1.5;
 
 function isImpassable(terrain: number): boolean {
   return terrain === TERRAIN_MOUNTAIN || terrain === TERRAIN_WATER;
@@ -40,7 +38,7 @@ export function createInitialState(
     pos: { x: c.pos.x, y: c.pos.y },
     owner: spawnOwners.get(c.id) ?? c.owner ?? (0 as PlayerId),
     production: c.production,
-    produceCooldownTicks: 0,
+    produceCooldownTicks: spawnOwners.has(c.id) ? 0 : UNIT_STATS[c.production].produceIntervalTicks,
     captureProgressTicks: 0,
     capturingPlayer: null,
     supplyUsed: 0,
@@ -54,39 +52,18 @@ export function createInitialState(
     const spawnCity = map.cities.find((c) => c.id === spawn.cityId);
     if (!spawnCity) continue;
 
-    const enemySpawn = map.spawns.find((s) => s.player !== spawn.player);
-    if (!enemySpawn) continue;
-    const enemyCity = map.cities.find((c) => c.id === enemySpawn.cityId);
-    if (!enemyCity) continue;
-
-    const dx = enemyCity.pos.x - spawnCity.pos.x;
-    const dy = enemyCity.pos.y - spawnCity.pos.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    const dirX = dist > 0 ? dx / dist : 1;
-    const dirY = dist > 0 ? dy / dist : 0;
-
-    const perpX = -dirY;
-    const perpY = dirX;
-
-    const formationOffset = dist * FORMATION_OFFSET_RATIO;
-    const centerX = spawnCity.pos.x + dirX * formationOffset;
-    const centerY = spawnCity.pos.y + dirY * formationOffset;
-
     let count = 0;
-    const halfCount = (UNITS_PER_PLAYER - 1) / 2;
 
-    for (let i = 0; i < UNITS_PER_PLAYER; i++) {
-      const offset = (i - halfCount) * FORMATION_SPACING;
-      const px = centerX + perpX * offset;
-      const py = centerY + perpY * offset;
-
-      if (isValidPos(map, px, py)) {
+    if (spawn.unitPositions && spawn.unitPositions.length > 0) {
+      // Explicit positions from map data
+      for (const pos of spawn.unitPositions) {
+        if (!isValidPos(map, pos.x, pos.y)) continue;
         units.push({
           id: nextId as EntityId,
           owner: spawn.player,
           kind: 'light',
           homeCity: spawn.cityId,
-          pos: { x: px, y: py },
+          pos: { x: pos.x, y: pos.y },
           hp: UNIT_STATS.light.hp,
           path: null,
           goal: null,
@@ -95,19 +72,17 @@ export function createInitialState(
         nextId++;
         count++;
       }
-    }
-
-    // Fallback: if formation placement failed, use rng for remaining slots
-    if (count < UNITS_PER_PLAYER) {
-      const needed = UNITS_PER_PLAYER - count;
+    } else {
+      // Fallback: scatter near spawn city using RNG
+      const radius = 5;
+      const needed = UNITS_PER_PLAYER;
       const candidates: { x: number; y: number }[] = [];
       for (let y = 0; y < map.height; y++) {
         for (let x = 0; x < map.width; x++) {
           if (isImpassable(map.terrain[y * map.width + x]!)) continue;
-          const distToCenter = Math.sqrt(
-            (x - centerX) * (x - centerX) + (y - centerY) * (y - centerY),
-          );
-          if (distToCenter < formationOffset * 2) {
+          const dx = x - spawnCity.pos.x;
+          const dy = y - spawnCity.pos.y;
+          if (Math.sqrt(dx * dx + dy * dy) <= radius) {
             candidates.push({ x, y });
           }
         }

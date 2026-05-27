@@ -1,13 +1,50 @@
 import type { GameState } from '../types.js';
-import { TICK_RATE, UNIT_STATS } from '../constants.js';
+import { TICK_RATE, UNIT_STATS, ATTACK_RANGE, ENGAGE_DISTANCE, ENGAGE_SPEED_FACTOR } from '../constants.js';
+import { SpatialHash } from '../spatial-hash.js';
 
 const WAYPOINT_THRESHOLD = 0.3;
 
 export function moveUnits(state: GameState): void {
-  for (const unit of state.units) {
+  const { units, map } = state;
+
+  const hash = new SpatialHash(1, map.width, map.height);
+  for (const u of units) {
+    hash.insert(u.id, u.pos.x, u.pos.y);
+  }
+
+  const unitById = new Map(units.map((u, i) => [u.id as number, i]));
+
+  const engageDistSq = ENGAGE_DISTANCE * ENGAGE_DISTANCE;
+  const attackRangeSq = ATTACK_RANGE * ATTACK_RANGE;
+
+  for (const unit of units) {
     if (unit.goal === null) continue;
 
-    const speed = UNIT_STATS[unit.kind].speed / TICK_RATE;
+    let speedFactor = 1.0;
+    const nearby = hash.query(unit.pos.x, unit.pos.y, ENGAGE_DISTANCE);
+
+    for (const candidateId of nearby) {
+      if (candidateId === unit.id) continue;
+      const idx = unitById.get(candidateId as number);
+      if (idx === undefined) continue;
+      const candidate = units[idx]!;
+      if (candidate.owner === unit.owner) continue;
+
+      const dx = candidate.pos.x - unit.pos.x;
+      const dy = candidate.pos.y - unit.pos.y;
+      const distSq = dx * dx + dy * dy;
+
+      if (distSq <= attackRangeSq) {
+        speedFactor = 0.0;
+        break;
+      }
+      if (distSq <= engageDistSq && speedFactor > ENGAGE_SPEED_FACTOR) {
+        speedFactor = ENGAGE_SPEED_FACTOR;
+      }
+    }
+
+    const speed = (UNIT_STATS[unit.kind].speed / TICK_RATE) * speedFactor;
+    if (speed < 1e-9) continue;
 
     if (unit.path !== null && unit.path.length > 0) {
       let remaining = speed;

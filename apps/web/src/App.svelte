@@ -204,6 +204,21 @@
       canvas.removeEventListener('contextmenu', onContextMenu);
     };
 
+    // Debug: log initial unit positions at spawn
+    {
+      const p0Units = cur.units.filter((u) => u.owner === (0 as PlayerId));
+      const p1Units = cur.units.filter((u) => u.owner === (1 as PlayerId));
+      console.log(`[tick=0] Initial state: ${cur.units.length} units (P0:${p0Units.length}, P1:${p1Units.length})`);
+      for (const u of p0Units) {
+        console.log(`  P0 id=${u.id} pos=(${u.pos.x.toFixed(1)}, ${u.pos.y.toFixed(1)})`);
+      }
+      for (const u of p1Units) {
+        console.log(`  P1 id=${u.id} pos=(${u.pos.x.toFixed(1)}, ${u.pos.y.toFixed(1)})`);
+      }
+    }
+
+    let prevUnitCount = cur.units.length;
+
     loop = createLoop({
       tickRateHz: 30,
       onTick: () => {
@@ -216,6 +231,23 @@
         };
         recorder.record(frame);
         cur = tick(prev, [frame], rng);
+
+        // Debug: detect unit spawns
+        if (cur.units.length > prevUnitCount) {
+          const newCount = cur.units.length - prevUnitCount;
+          const newUnits = cur.units.slice(-newCount);
+          for (const u of newUnits) {
+            console.log(`[tick=${cur.tick}] SPAWN: owner=${u.owner} id=${u.id} pos=(${u.pos.x.toFixed(1)}, ${u.pos.y.toFixed(1)})`);
+          }
+        }
+        prevUnitCount = cur.units.length;
+
+        // Debug: log every 100 ticks
+        if (cur.tick % 100 === 0 && cur.tick > 0) {
+          const p0 = cur.units.filter((u) => u.owner === (0 as PlayerId));
+          const p1 = cur.units.filter((u) => u.owner === (1 as PlayerId));
+          console.log(`[tick=${cur.tick}] Units: P0=${p0.length} P1=${p1.length} total=${cur.units.length}`);
+        }
 
         if (cur.tick - lastInfluenceTick >= 5) {
           cachedInfluence = computeInfluenceMap(cur);

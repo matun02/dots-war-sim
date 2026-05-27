@@ -56,7 +56,7 @@ export interface MapDef {
   height: number;
   terrain: number[];
   cities: Readonly<Pick<City, 'id' | 'pos' | 'production'> & { owner?: PlayerId }>[];
-  spawns: { player: PlayerId; cityId: CityId }[];
+  spawns: { player: PlayerId; cityId: CityId; unitPositions?: Vec2[] }[];
 }
 
 export interface GameState {

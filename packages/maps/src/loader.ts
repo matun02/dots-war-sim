@@ -59,6 +59,7 @@ export function loadMap(json: unknown): MapDef {
     spawns: spawns.map((s) => ({
       player: s.player as PlayerId,
       cityId: s.cityId as CityId,
+      ...(s.unitPositions ? { unitPositions: s.unitPositions } : {}),
     })),
   };
 }

@@ -2,6 +2,8 @@ export const TICK_RATE = 30;
 export const SUPPLY_MAX = 5;
 
 export const ATTACK_RANGE = 1.5;
+export const ENGAGE_DISTANCE = 3.0;
+export const ENGAGE_SPEED_FACTOR = 0.25;
 export const CAPTURE_TICKS = 90;
 export const POST_CAPTURE_COOLDOWN_TICKS = 150;
 

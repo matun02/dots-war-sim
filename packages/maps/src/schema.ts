@@ -13,6 +13,9 @@ const CitySchema = v.object({
 const SpawnSchema = v.object({
   player: v.number(),
   cityId: v.number(),
+  unitPositions: v.optional(
+    v.array(v.object({ x: v.number(), y: v.number() })),
+  ),
 });
 
 export const MapJsonSchema = v.pipe(
