@@ -44,13 +44,18 @@ TASKS.md の当該タスクの受け入れ基準を全て満たしているこ�
 
 該当マイルストーンの進捗を更新（「進行中」→「完了」等）。
 
-### 2d. archive/completed-tasks.md に詳細を追加
+### 2d. wiki を同期更新する
+
+`skill-wiki-update.md` の **A. 差分同期モード** を実行する。
+アルゴリズムや定数を変更した場合は必ず実行すること。
+学びがあれば **C. 学び追記モード** も実行する。
+
+### 2e. archive/completed-tasks.md に詳細を追加
 
 既存フォーマットに合わせて以下を追記:
 - 目的、作業内容、成果物
 - **実績**: 所要時間
 - **学び**: 技術的発見・注意点（将来の同種タスクで役立つ知見）
-- アルゴリズムや定数を変更した場合、対応する wiki ページ (`wiki/` 配下) も更新する
 
 ---
 
@@ -71,7 +76,7 @@ TASKS.md の当該タスクの受け入れ基準を全て満たしているこ�
 ## 4. commit & push する
 
 ```bash
-git add .claude/TASKS.md .claude/CLAUDE.md .claude/archive/changelog.md .claude/archive/completed-tasks.md
+git add .claude/TASKS.md .claude/CLAUDE.md .claude/archive/changelog.md .claude/archive/completed-tasks.md .claude/wiki/
 git commit -m "docs(claude): update project docs for {TASK_ID} completion
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
