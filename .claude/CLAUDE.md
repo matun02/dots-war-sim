@@ -25,8 +25,15 @@
 | 音 | Howler.js | SFX / BGM |
 | 永続化 | idb-keyval (IndexedDB) | リプレイ・設定 |
 | ホスティング | Cloudflare Pages | 静的SPA |
+| UI状態 | Zustand | UI状態のみ |
 | テスト | Vitest + Playwright | 単体 + E2E |
 | CI/CD | GitHub Actions | テスト・デプロイ |
+| サーバ(後) | CF Workers + Durable Objects | マルチプレイ |
+| DB(後) | Cloudflare D1 | ランキング |
+| ストア(後) | Cloudflare R2 | リプレイ共有 |
+| 認証(後) | 匿名UUID → Auth.js | 段階導入 |
+| エラー(後) | Sentry | 本番監視 |
+| 分析(後) | CF Web Analytics + PostHog | 行動分析 |
 
 ★MUST: 依存追加は Issue で合意を得る。
 
@@ -104,6 +111,7 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 - 不明点は推測せず質問
 - コミット前に`skills/skill-pre-commit-check.md`実施
 - 視覚変更は「目視確認が必要」と報告
+- 数値変更時は設定値と期待ログを提示する
 - ユーザーの報告→症状確認が先。仮説に読み替えない
 
 ### ★MUST NOT
@@ -111,6 +119,12 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 - グローバルESLint/TS設定変更
 - ドキュメント大規模書き換え / 頼まれていない修正
 - ユーザーの診断 > AIの仮説
+
+### SHOULD: 人間に判断を仰ぐもの
+- パフォーマンス vs 可読性のトレードオフ
+- APIのシグネチャ変更
+- 公開関数のリネーム
+- アセット差し替え
 
 ### ★MUST: wiki整合性ルール
 - **wikiの数値とコードが矛盾する場合、勝手に判断せずユーザーに確認する**
@@ -121,6 +135,7 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 - WebGL Canvasはスクリーンショット不可(黒画面)→JS状態検証が最初の手段
 - Chrome拡張ボタンクリック不安定→JSの`.click()`優先
 - `?debug=1`デバッグモード常設推奨
+- 途中状態からのテストハーネス整備が必要(heavy切替・経済拡張等)
 - ウェブテストはログで検証。ログがなければ追加を提案
 
 ---
@@ -132,6 +147,10 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 
 ---
 
-## 8. 変更履歴
+## 8. 変更履歴（最新 3 件 — 全履歴は `archive/changelog.md`）
 
-最新履歴: `archive/changelog.md`参照。
+| 日付 | バージョン | 変更 |
+|---|---|---|
+| 2026-05-28 | 2.0.0 | LLM Wiki 3層化。CLAUDE.md/DESIGN.md スリム化、wiki/ 56ファイル作成 |
+| 2026-05-25 | 1.0.23 | P2-T4.3 完了（中央配置・後方都市・中立削除・HP5倍）。テスト合計186件 |
+| 2026-05-24 | 1.0.22 | P2-T4.2 完了（隊形配置・衝突分離・HP/サイズ3倍）。テスト9件追加（合計186件） |

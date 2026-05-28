@@ -22,3 +22,8 @@
 | cityCapture | units都市マス滞在 | City.captureProgress, owner |
 | produceUnits | cities, players | units(追加) |
 | evaluateGameEnd | players, cities, tick | state.result |
+
+## 入力(InputFrame)
+- 入力はInputFrameにバッチ化される
+- ローカル入力もネットワーク入力も同じ型
+- Lockstep化(Phase3)はサーバ配布InputFrameをそのままtickへ渡す
