@@ -1,0 +1,7 @@
+- [ ] PixiJS ParticleContainerでユニットバッチ
+- [ ] ユニット/弾/エフェクトのObject Pool
+- [ ] パスファインディング結果キャッシュ
+- [ ] 影響マップは5tickごと
+- [ ] 当たり判定はSpatialHash(実装済み)
+- [ ] 不要なstructuredCloneを避ける
+- [ ] アセット: WebP/AVIF、圧縮、フォントsubset

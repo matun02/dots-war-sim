@@ -1,0 +1,5 @@
+- `feat/<short-name>` 機能追加
+- `fix/<short-name>` バグ修正
+- `chore/<short-name>` 雑務
+- `docs/<short-name>` 文書のみ
+- `refactor/<short-name>` 機能を変えないリファクタ

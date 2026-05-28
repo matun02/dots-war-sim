@@ -42,10 +42,11 @@
 空実装のファイルは「空実装」と明記し、シグネチャを記載する。
 既に実装済みのファイルは主要 API を記載する。
 
-### 3. DESIGN.md から関連セクションを特定する
+### 3. wiki から関連ページを特定する
 
-TASKS.md のタスク定義に「入力: `DESIGN.md` 章 X」と書かれている場合、
-そのセクション番号をプロンプトの冒頭指示に含める。
+TASKS.md のタスク定義に関連する wiki ページを `.claude/wiki/index.md` から探し、
+プロンプトの冒頭指示に Read 対象として含める。
+旧 DESIGN.md セクション番号は wiki へ移行済み（例: 旧§1→wiki/game-rules/, 旧§5→wiki/sim/）。
 
 ### 4. プロンプトを組み立てる
 
@@ -58,7 +59,8 @@ TASKS.md のタスク定義に「入力: `DESIGN.md` 章 X」と書かれてい�
 ```markdown
 ## 事前にコンテキスト把握（必須）
 @.claude/CLAUDE.md @.claude/DESIGN.md @.claude/TASKS.md @.claude/SETUP.md を読んでください。
-特に CLAUDE.md §{関連セクション} と DESIGN.md §{関連セクション} を厳密に守ること。
+特に CLAUDE.md §{関連セクション} を厳密に守ること。
+タスクに関連する wiki ページも Read で参照: `.claude/wiki/index.md` → 該当サブディレクトリの index.md → 対象ファイル。
 
 ## 現在の状態
 - M{N}（{マイルストーン名}）{完了 or 進行中}。P1-T1〜T{最後の完了タスク} 全て green。
