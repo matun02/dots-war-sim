@@ -46,9 +46,9 @@ TASKS.md の当該タスクの受け入れ基準を全て満たしているこ�
 
 ### 2d. wiki を同期更新する
 
-`skill-wiki-update.md` の **A. 差分同期モード** を実行する。
+`skill-wiki-sync.md` を実行する。
 アルゴリズムや定数を変更した場合は必ず実行すること。
-学びがあれば **C. 学び追記モード** も実行する。
+学びがあれば `skill-wiki-lessons.md` も実行する。
 
 ### 2e. archive/completed-tasks.md に詳細を追加
 

@@ -5,3 +5,4 @@
 - [pr-dod.md](pr-dod.md) — PR DoD チェックリスト
 - [glossary.md](glossary.md) — 用語テーブル
 - [directory-tree.md](directory-tree.md) — ディレクトリ構成
+- [wiki-maintenance.md](wiki-maintenance.md) — wiki更新の共通ルール・マッピング
