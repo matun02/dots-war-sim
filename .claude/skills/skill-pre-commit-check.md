@@ -18,7 +18,7 @@ git status
 - テスト用の一時変更（色・alpha・パラメータ変更等）が戻されているか
 
 ### 1b. 決定論チェック（`core/sim/` 変更時は必須）
-`CLAUDE.md` §4.3 の禁止事項に違反がないか確認:
+`CLAUDE.md` §4.2 の禁止事項に違反がないか確認:
 - [ ] `Math.random()` → `rng.next()` を使っているか
 - [ ] `Date.now()` / `performance.now()` → `state.tick` を使っているか
 - [ ] `Map`/`Set` のイテレーション順依存がないか
@@ -28,11 +28,11 @@ git status
 - [ ] `async/await` がないか
 
 ### 1c. アーキテクチャ境界チェック
-- [ ] `core/` から `apps/` を import していないか（CLAUDE.md §3.1）
+- [ ] `core/` から `apps/` を import していないか（CLAUDE.md §3）
 - [ ] `core/sim` 内で副作用がないか
-- [ ] `render/` のみが PixiJS を import しているか（CLAUDE.md §4.5）
-- [ ] `ui/` のみが Svelte コンポーネントか（CLAUDE.md §4.6）
-- [ ] 触ったディレクトリが 2 つ以内か（CLAUDE.md §7.2）
+- [ ] `render/` のみが PixiJS を import しているか（CLAUDE.md §4.3）
+- [ ] `ui/` のみが Svelte コンポーネントか（CLAUDE.md §4.3）
+- [ ] 触ったディレクトリが 2 つ以内か（CLAUDE.md §6）
 
 ### 1d. パフォーマンスチェック
 - [ ] ゲームループ内（onTick / onRender）で不要なオブジェクト生成がないか
@@ -80,7 +80,7 @@ pnpm --filter @dots-war-sim/web dev
 #### パフォーマンス
 - [ ] 60 FPS が維持されている（体感で滑らか）
 
-### 3c. 注意事項（CLAUDE.md §7.5）
+### 3c. 注意事項（CLAUDE.md §6 ウェブテスト注意）
 - WebGL Canvas のスクリーンショットは黒画面になるため、JS 状態検証（`javascript_tool`）を併用する
 - Chrome 拡張のボタンクリックは不安定 → JS の `.click()` や `PointerEvent` dispatch を優先する
 - 特定条件のライブ検証が必要な場合は、一時的にパラメータを変更して確認後に必ず元に戻す
