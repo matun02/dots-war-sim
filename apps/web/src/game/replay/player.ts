@@ -6,7 +6,7 @@ import {
   createInitialState,
   tick,
 } from '@dots-war-sim/core';
-import { loadMap, firstBloodJson } from '@dots-war-sim/maps';
+import { loadMap, getMapJson } from '@dots-war-sim/maps';
 
 export interface ReplayPlayer {
   currentTick(): number;
@@ -16,7 +16,7 @@ export interface ReplayPlayer {
 }
 
 export function createReplayPlayer(replay: Replay): ReplayPlayer {
-  const map = loadMap(firstBloodJson);
+  const map = loadMap(getMapJson(replay.mapId));
   const players = replay.players.map((p) => ({
     id: p.id,
     name: p.name,

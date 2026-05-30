@@ -13,8 +13,13 @@
     createInitialState,
     tick,
   } from '@dots-war-sim/core';
-  import { loadMap, firstBloodJson } from '@dots-war-sim/maps';
-  import { createStage, destroyStage, type Application } from './game/render/stage';
+  import { loadMap, getMapJson } from '@dots-war-sim/maps';
+  import {
+    createStage,
+    destroyStage,
+    fitStageToWorld,
+    type Application,
+  } from './game/render/stage';
   import { drawTerrain } from './game/render/terrain';
   import { drawGrid } from './game/render/grid';
   import { createCityRenderer } from './game/render/cities';
@@ -41,6 +46,7 @@
   let gameResult: GameResult | null = $state(null);
   let lastReplay: Replay | null = $state(null);
   let replayPaused = $state(false);
+  let currentMapId = 'first-blood';
 
   const players: Player[] = [
     { id: 0 as PlayerId, name: 'Player 1', color: 0x4488ff, alive: true },
@@ -73,7 +79,8 @@
     replayPaused = false;
   }
 
-  async function startGame(): Promise<void> {
+  async function startGame(mapId: string = 'first-blood'): Promise<void> {
+    currentMapId = mapId;
     stopLoop();
     gameResult = null;
     replayPaused = false;
@@ -88,7 +95,7 @@
     } else {
       app = await createStage(canvasEl);
     }
-    const map = loadMap(firstBloodJson);
+    const map = loadMap(getMapJson(mapId));
 
     const gamePlayers = players.map((p) => ({ ...p, alive: true }));
     let prev = createInitialState(map, gamePlayers, 42);
@@ -101,6 +108,7 @@
     const cellPx = 20;
     drawTerrain(app, map, cellPx);
     drawGrid(app, map.width, map.height, cellPx);
+    fitStageToWorld(app, map.width * cellPx, map.height * cellPx);
     const cityRenderer = createCityRenderer(app, cellPx);
     cityRenderer.update(cur.cities);
 
@@ -122,12 +130,20 @@
     let selectionBox: SelectionBox | null = null;
 
     const canvas = canvasEl;
+    const stageRef = app.stage;
+
+    function toWorld(e: MouseEvent): { x: number; y: number } {
+      const scale = stageRef.scale.x;
+      return {
+        x: (e.offsetX - stageRef.position.x) / (cellPx * scale),
+        y: (e.offsetY - stageRef.position.y) / (cellPx * scale),
+      };
+    }
 
     function onMouseDown(e: MouseEvent): void {
       if (e.button !== 0) return;
       dragging = true;
-      const wx = e.offsetX / cellPx;
-      const wy = e.offsetY / cellPx;
+      const { x: wx, y: wy } = toWorld(e);
       selectionBox = {
         startWorld: { x: wx, y: wy },
         endWorld: { x: wx, y: wy },
@@ -136,20 +152,14 @@
 
     function onMouseMove(e: MouseEvent): void {
       if (!dragging || !selectionBox) return;
-      selectionBox.endWorld = {
-        x: e.offsetX / cellPx,
-        y: e.offsetY / cellPx,
-      };
+      selectionBox.endWorld = toWorld(e);
       selectionRenderer.show(selectionBox.startWorld, selectionBox.endWorld);
     }
 
     function onMouseUp(e: MouseEvent): void {
       if (e.button !== 0 || !dragging || !selectionBox) return;
       dragging = false;
-      selectionBox.endWorld = {
-        x: e.offsetX / cellPx,
-        y: e.offsetY / cellPx,
-      };
+      selectionBox.endWorld = toWorld(e);
 
       const dx = selectionBox.endWorld.x - selectionBox.startWorld.x;
       const dy = selectionBox.endWorld.y - selectionBox.startWorld.y;
@@ -187,8 +197,7 @@
 
     function onContextMenu(e: MouseEvent): void {
       e.preventDefault();
-      const wx = e.offsetX / cellPx;
-      const wy = e.offsetY / cellPx;
+      const { x: wx, y: wy } = toWorld(e);
       inputCollector.moveCommand({ x: wx, y: wy });
     }
 
@@ -294,10 +303,11 @@
 
     app.stage.removeChildren();
 
-    const map = loadMap(firstBloodJson);
+    const map = loadMap(getMapJson(lastReplay.mapId));
     const cellPx = 20;
     drawTerrain(app, map, cellPx);
     drawGrid(app, map.width, map.height, cellPx);
+    fitStageToWorld(app, map.width * cellPx, map.height * cellPx);
     const cityRenderer = createCityRenderer(app, cellPx);
     const replayFrontlineRenderer = createFrontlineRenderer(cellPx);
     app.stage.addChild(replayFrontlineRenderer.container);
@@ -356,7 +366,7 @@
 
   function handleRematch(): void {
     lastReplay = null;
-    startGame();
+    startGame(currentMapId);
   }
 
   function handleTitle(): void {
@@ -375,7 +385,7 @@
 </script>
 
 {#if screen === 'title'}
-  <Title onstart={startGame} />
+  <Title onstart={(mapId) => startGame(mapId)} />
 {/if}
 
 {#if screen === 'game' || screen === 'result' || screen === 'replay'}
