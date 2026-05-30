@@ -33,6 +33,7 @@
 | 2026-05-24 | 1.0.21 | P2-T4.1 完了（前線・領土システム再設計）。`init.ts` 初期ユニット配置(10体/プレイヤー、自陣半分、山回避、Rng決定論)。`influence-map.ts` 円形フォールオフ(R=10)+都市重み(300)+3回平滑化に刷新。テスト 11 件追加（合計 177 件） |
 | 2026-05-24 | 1.0.22 | P2-T4.2 完了（隊形配置・衝突分離・HP/サイズ3倍）。`init.ts` 方向ベクトル隊形配置、`separate-units.ts` SpatialHash衝突分離(SEPARATION_DIST=0.6)、HP 3倍(light:3, heavy:15)、描画半径3倍(light:0.75, heavy:1.05)。テスト 9 件追加（合計 186 件） |
 | 2026-05-25 | 1.0.23 | P2-T4.3 完了（中央配置・後方都市・中立削除・HP5倍）。`init.ts` 比率ベースオフセット(40%)、`first-blood.json` 後方都市4追加(計8)、`types.ts` City.ownerからnull排除、`update-city-capture.ts` 直接フリップ化(CAPTURE_TICKS=90)、HP 5倍(light:15, heavy:75)。テスト更新（合計 186 件） |
+| 2026-05-30 | 1.0.24 | P2-T5 完了（新規マップ4枚+選択UI、ビューポートfit）。`packages/maps` に bridge/four-corners/strait/corridor.json 追加(平地連結性・対称性を生成時検証)、`index.ts` に MAP_CATALOG/getMapJson、`Title.svelte` マップ選択UI、`stage.ts` fitStageToWorld(均一スケール+中央寄せでビューポートfit)、`App.svelte`/`player.ts` で選択マップ受け渡し。maps テスト27件追加（合計 223 件） |
 
 ---
 
@@ -61,3 +62,4 @@
 | 2026-05-24 | 1.0.21 | P2-T4.1 完了マーク（commit `1816f95`）。前線・領土システム再設計 — init.ts初期配置 + influence-map.ts円形フォールオフ刷新 + 都市重み。新規テスト 11 件（合計 177 件）。M4 進行中 |
 | 2026-05-24 | 1.0.22 | P2-T4.2 完了マーク（commit `803b10c`）。隊形配置・衝突分離・HP/サイズ3倍 — init.ts方向ベクトル隊形 + separate-units.ts衝突分離 + HP/描画3倍。新規テスト 9 件（合計 186 件）。M4 進行中 |
 | 2026-05-25 | 1.0.23 | P2-T4.3 完了マーク（commit `7c496ff`）。中央配置・後方都市・中立削除・HP5倍 — init.ts比率オフセット(40%) + first-blood.json後方都市4追加(計8) + City.ownerからnull排除 + 直接フリップ化 + HP5倍。テスト更新（合計 186 件）。M4 進行中 |
+| 2026-05-30 | 1.0.24 | P2-T5 完了マーク（commit `ae87cd0`）。マップ追加(計5枚) + マップ選択UI + ビューポートfit — bridge/four-corners/strait/corridor.json + MAP_CATALOG/getMapJson + Title.svelteマップ選択 + stage.tsフィットスケール + App.svelte/player.ts受け渡し。mapsテスト27件追加（合計 223 件）。M4 進行中 |

@@ -10,6 +10,7 @@
 ## 2. 型安全性
 - [ ] `any` / 不要な `as` がないか
 - [ ] branded type を適切に使っているか
+- [ ] CommonJS (`require`/`module.exports`) を使っていないか（ESM only）
 
 ## 3. アーキテクチャ境界
 → `CLAUDE.md` §3 + §4.3 の依存方向・レイヤー分離に違反がないか確認
@@ -29,3 +30,7 @@
 
 ## 7. PR の DoD
 → `wiki/conventions/pr-dod.md` のチェックリストを確認
+
+## 8. wiki 整合性（定数・アルゴリズム変更時）
+- [ ] 変更した定数/アルゴリズムに対応する wiki ページが更新されているか
+→ `wiki/conventions/wiki-maintenance.md` のマッピングテーブル参照

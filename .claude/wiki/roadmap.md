@@ -1,7 +1,6 @@
 > truth source: `.claude/archive/future-phases.md`
 
 ## Phase 2 残タスク
-- P2-T5: マップ追加(計5枚: first-blood/bridge/four-corners/strait/corridor)
 - P2-T6: チュートリアル(初回起動時オーバーレイ)
 - P2-T7: 勝利条件80%+影響マップ都市重み
 
