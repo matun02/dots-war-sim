@@ -152,6 +152,6 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 
 | 日付 | 変更 |
 |---|---|
+| 2026-06-02 | PR #4 Codex 指摘対応。`separate-units.ts` の `isImpassable` が water を壁扱いしていたのを mountain のみに修正（A*/init と統一。water 上で重なったユニットが分離不能だったバグ）。separate-units テスト+1。全テスト緑(core162/maps43/web36) |
 | 2026-06-02 | 地形による移動速度倍率を追加（`TERRAIN_SPEED_PCT`: water light/heavy 50%・forest heavy 75%、乗っているタイルで判定。移動コスト＝経路選択とは別軸）。`constants.ts`＋`move-units.ts`、move-unitsテスト+2。全テスト緑(core161/maps43/web36) |
 | 2026-06-01 | コアバランス刷新（A1対策）：速度半減(light2/heavy1)、hp/attack ×100スケール(決定論)、地形コスト再定義(mountain=壁・water/forest通行可)、地形攻撃倍率(攻撃側地形・heavy森水/light水で×0.75)。constants/astar/init/resolve-combat＋coreテスト更新。全テスト緑(core159/maps43/web36)。既存マップは要再調整 |
-| 2026-05-31 | 新規マップ Veln Corridor 追加（非対称6都市/3対3）。初期ユニット種別指定機能 — spawn `kind`(light/heavy, 既定light) を schema/types/loader/init に追加、heavyは平地のみ配置・supplyUsedをコスト計上化。全テスト緑（core156/maps43/web36） |

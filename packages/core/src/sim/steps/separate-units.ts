@@ -3,10 +3,11 @@ import { SpatialHash } from '../spatial-hash.js';
 
 const SEPARATION_DIST = 0.6;
 const TERRAIN_MOUNTAIN = 1;
-const TERRAIN_WATER = 3;
 
+// 通行可否はコア地形ルールと統一: mountain のみ壁（water/forest は通行可）。
+// 出典: pathfinding/astar.ts, sim/init.ts。
 function isImpassable(terrain: number): boolean {
-  return terrain === TERRAIN_MOUNTAIN || terrain === TERRAIN_WATER;
+  return terrain === TERRAIN_MOUNTAIN;
 }
 
 export function separateUnits(state: GameState): void {
