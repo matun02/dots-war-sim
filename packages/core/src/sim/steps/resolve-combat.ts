@@ -1,6 +1,6 @@
 import type { GameState } from '../types.js';
 import type { Rng } from '../../rng.js';
-import { ATTACK_RANGE, UNIT_STATS } from '../constants.js';
+import { ATTACK_RANGE, UNIT_STATS, TERRAIN_ATTACK_PCT } from '../constants.js';
 import { SpatialHash } from '../spatial-hash.js';
 
 export function resolveCombat(state: GameState, _rng: Rng): void {
@@ -64,7 +64,14 @@ export function resolveCombat(state: GameState, _rng: Rng): void {
     if (bestIdx === -1) continue;
 
     const target = units[bestIdx]!;
-    target.hp -= UNIT_STATS[attacker.kind].attack;
+    // Terrain attack multiplier keyed by the ATTACKER's tile. Integer
+    // round-half-up keeps damage deterministic (no float-order dependence).
+    const ax = Math.floor(attacker.pos.x);
+    const ay = Math.floor(attacker.pos.y);
+    const terrain = map.terrain[ay * map.width + ax] ?? 0;
+    const pct = TERRAIN_ATTACK_PCT[attacker.kind][terrain] ?? 100;
+    const dmg = Math.floor((UNIT_STATS[attacker.kind].attack * pct + 50) / 100);
+    target.hp -= dmg;
     attacker.attackCooldownTicks = UNIT_STATS[attacker.kind].attackIntervalTicks;
   }
 }

@@ -1,5 +1,5 @@
 import type { GameState } from '../types.js';
-import { TICK_RATE, UNIT_STATS, ATTACK_RANGE, ENGAGE_DISTANCE, ENGAGE_SPEED_FACTOR } from '../constants.js';
+import { TICK_RATE, UNIT_STATS, ATTACK_RANGE, ENGAGE_DISTANCE, ENGAGE_SPEED_FACTOR, TERRAIN_SPEED_PCT } from '../constants.js';
 import { SpatialHash } from '../spatial-hash.js';
 
 const WAYPOINT_THRESHOLD = 0.3;
@@ -43,7 +43,17 @@ export function moveUnits(state: GameState): void {
       }
     }
 
-    const speed = (UNIT_STATS[unit.kind].speed / TICK_RATE) * speedFactor;
+    // Terrain movement-speed multiplier from the tile the unit currently occupies
+    // (distinct from A* routing cost). Stacks multiplicatively with engagement slowdown.
+    const tx = Math.floor(unit.pos.x);
+    const ty = Math.floor(unit.pos.y);
+    const ti = ty * map.width + tx;
+    const terrainPct =
+      ti >= 0 && ti < map.terrain.length
+        ? TERRAIN_SPEED_PCT[unit.kind][map.terrain[ti]!] ?? 100
+        : 100;
+    const speed =
+      (UNIT_STATS[unit.kind].speed / TICK_RATE) * speedFactor * (terrainPct / 100);
     if (speed < 1e-9) continue;
 
     if (unit.path !== null && unit.path.length > 0) {

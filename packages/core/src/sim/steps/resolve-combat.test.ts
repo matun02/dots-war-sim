@@ -151,8 +151,8 @@ describe('resolveCombat', () => {
   });
 
   it('allows mutual attacks in same tick (simultaneous combat)', () => {
-    const u0 = makeUnit({ id: eid(0), owner: pid(0), pos: { x: 5, y: 5 }, hp: 1 });
-    const u1 = makeUnit({ id: eid(1), owner: pid(1), pos: { x: 5, y: 5 }, hp: 1 });
+    const u0 = makeUnit({ id: eid(0), owner: pid(0), pos: { x: 5, y: 5 }, hp: UNIT_STATS.light.attack });
+    const u1 = makeUnit({ id: eid(1), owner: pid(1), pos: { x: 5, y: 5 }, hp: UNIT_STATS.light.attack });
     const state = makeState([u0, u1]);
 
     resolveCombat(state, rng);
@@ -161,7 +161,7 @@ describe('resolveCombat', () => {
     expect(state.units.find((u) => (u.id as number) === 1)!.hp).toBe(0);
   });
 
-  it('heavy kills light in one hit (attack=3 vs hp=3)', () => {
+  it('deals heavy.attack / light.attack damage on plain (terrain ×1)', () => {
     const heavy = makeUnit({
       id: eid(0),
       owner: pid(0),
@@ -236,5 +236,45 @@ describe('resolveCombat', () => {
     expect(state.units.find((u) => (u.id as number) === 0)!.attackCooldownTicks).toBe(
       UNIT_STATS.heavy.attackIntervalTicks,
     );
+  });
+
+  it('terrain attack multiplier: heavy on forest deals 0.75× (225)', () => {
+    const attacker = makeUnit({ id: eid(0), owner: pid(0), pos: { x: 2, y: 2 }, kind: 'heavy', hp: UNIT_STATS.heavy.hp });
+    const target = makeUnit({ id: eid(1), owner: pid(1), pos: { x: 2, y: 2 }, hp: 99999, attackCooldownTicks: 999 });
+    const terrain = Array.from({ length: 100 }, () => 0);
+    terrain[2 * 10 + 2] = 2; // forest under the attacker
+    const state = makeState([attacker, target]);
+    state.map = { ...dummyMap, terrain };
+
+    resolveCombat(state, rng);
+
+    expect(state.units.find((u) => (u.id as number) === 1)!.hp).toBe(99999 - 225);
+  });
+
+  it('terrain attack multiplier: light on water deals 0.75× (75)', () => {
+    const attacker = makeUnit({ id: eid(0), owner: pid(0), pos: { x: 3, y: 3 }, hp: UNIT_STATS.light.hp });
+    const target = makeUnit({ id: eid(1), owner: pid(1), pos: { x: 3, y: 3 }, hp: 99999, attackCooldownTicks: 999 });
+    const terrain = Array.from({ length: 100 }, () => 0);
+    terrain[3 * 10 + 3] = 3; // water under the attacker
+    const state = makeState([attacker, target]);
+    state.map = { ...dummyMap, terrain };
+
+    resolveCombat(state, rng);
+
+    expect(state.units.find((u) => (u.id as number) === 1)!.hp).toBe(99999 - 75);
+  });
+
+  it('terrain multiplier keys on the attacker tile, not the target tile', () => {
+    const attacker = makeUnit({ id: eid(0), owner: pid(0), pos: { x: 1, y: 1 }, kind: 'heavy', hp: UNIT_STATS.heavy.hp });
+    const target = makeUnit({ id: eid(1), owner: pid(1), pos: { x: 2, y: 1 }, hp: 99999, attackCooldownTicks: 999 });
+    const terrain = Array.from({ length: 100 }, () => 0);
+    terrain[1 * 10 + 2] = 2; // forest under the TARGET (2,1); attacker (1,1) is plain
+    const state = makeState([attacker, target]);
+    state.map = { ...dummyMap, terrain };
+
+    resolveCombat(state, rng);
+
+    // attacker stands on plain → full 300 (target's forest does not reduce it)
+    expect(state.units.find((u) => (u.id as number) === 1)!.hp).toBe(99999 - 300);
   });
 });

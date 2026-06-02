@@ -30,10 +30,10 @@ describe('findPath (A*)', () => {
     expect(path![path!.length - 1]).toEqual({ x: 5, y: 0 });
   });
 
-  it('detours around impassable water wall', () => {
+  it('detours around impassable mountain wall', () => {
     const blocked: [number, number, number][] = [];
     for (let y = 0; y < 9; y++) {
-      blocked.push([5, y, 3]);
+      blocked.push([5, y, 1]);
     }
     const map = makeMap(10, 10, blocked);
     const path = findPath(map, { x: 3, y: 4 }, { x: 7, y: 4 }, 'light');
@@ -41,7 +41,7 @@ describe('findPath (A*)', () => {
 
     for (const p of path!) {
       const t = map.terrain[p.y * map.width + p.x];
-      expect(t).not.toBe(3);
+      expect(t).not.toBe(1);
     }
     expect(path![path!.length - 1]).toEqual({ x: 7, y: 4 });
   });
@@ -49,7 +49,7 @@ describe('findPath (A*)', () => {
   it('returns null when goal is unreachable', () => {
     const blocked: [number, number, number][] = [];
     for (let x = 0; x < 10; x++) {
-      blocked.push([x, 5, 3]);
+      blocked.push([x, 5, 1]);
     }
     const map = makeMap(10, 10, blocked);
     const path = findPath(map, { x: 3, y: 3 }, { x: 3, y: 7 }, 'light');
@@ -72,30 +72,20 @@ describe('findPath (A*)', () => {
     }
   });
 
-  it('heavy unit cannot traverse forest or mountain', () => {
-    const map = makeMap(10, 10, [[5, 0, 2]]);
-    const pathForest = findPath(
-      map,
-      { x: 4, y: 0 },
-      { x: 6, y: 0 },
-      'heavy',
-    );
-    expect(pathForest).not.toBeNull();
-    for (const p of pathForest!) {
-      expect(p.x === 5 && p.y === 0).toBe(false);
-    }
-
+  it('heavy cannot traverse mountain, but can traverse forest', () => {
+    // Mountain is a wall for heavy → detours around (5,0).
     const map2 = makeMap(10, 10, [[5, 0, 1]]);
-    const pathMtn = findPath(
-      map2,
-      { x: 4, y: 0 },
-      { x: 6, y: 0 },
-      'heavy',
-    );
+    const pathMtn = findPath(map2, { x: 4, y: 0 }, { x: 6, y: 0 }, 'heavy');
     expect(pathMtn).not.toBeNull();
     for (const p of pathMtn!) {
       expect(p.x === 5 && p.y === 0).toBe(false);
     }
+
+    // Forest is passable for heavy (cost 2): forced single-row corridor.
+    const forestGap = makeMap(3, 1, [[1, 0, 2]]);
+    const pathForest = findPath(forestGap, { x: 0, y: 0 }, { x: 2, y: 0 }, 'heavy');
+    expect(pathForest).not.toBeNull();
+    expect(pathForest!.some((p) => p.x === 1 && p.y === 0)).toBe(true);
   });
 
   it('returns a single-element path when start == goal', () => {

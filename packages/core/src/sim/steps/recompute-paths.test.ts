@@ -109,7 +109,7 @@ describe('recomputePaths', () => {
   it('resets goal to null when path is unreachable', () => {
     const terrain = Array.from({ length: 20 * 20 }, () => 0);
     for (let x = 0; x < 20; x++) {
-      terrain[5 * 20 + x] = 3;
+      terrain[5 * 20 + x] = 1;
     }
 
     const unit = makeUnit(1, {
