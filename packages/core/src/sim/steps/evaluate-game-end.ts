@@ -21,9 +21,16 @@ export function evaluateGameEnd(state: GameState): void {
     alivePlayers.push(p.id);
   }
 
+  const totalCities = state.cities.length;
   for (let i = 0; i < alivePlayers.length; i++) {
     const pid = alivePlayers[i]!;
-    if (state.cities.every((c) => c.owner === pid)) {
+    let ownedCities = 0;
+    for (let j = 0; j < state.cities.length; j++) {
+      if (state.cities[j]!.owner === pid) ownedCities++;
+    }
+    // 80% 以上の都市を支配で domination 勝利。
+    // ownedCities / totalCities >= 0.8 を整数演算で表現（浮動小数を避け決定論維持）。
+    if (ownedCities * 5 >= totalCities * 4) {
       state.result = { type: 'victory', winner: pid, reason: 'domination' };
       return;
     }

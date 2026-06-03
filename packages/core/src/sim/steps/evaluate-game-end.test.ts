@@ -206,6 +206,95 @@ describe('evaluateGameEnd', () => {
     expect(state.result).toBe(existingResult);
   });
 
+  it('triggers domination victory at 80% city control (4 of 5)', () => {
+    const state = makeState({
+      cities: [
+        makeCity({ id: cid(0), owner: pid(0) }),
+        makeCity({ id: cid(1), owner: pid(0) }),
+        makeCity({ id: cid(2), owner: pid(0) }),
+        makeCity({ id: cid(3), owner: pid(0) }),
+        makeCity({ id: cid(4), owner: pid(1) }),
+      ],
+      units: [
+        makeUnit({ id: eid(0), owner: pid(0) }),
+        makeUnit({ id: eid(1), owner: pid(1) }),
+      ],
+    });
+
+    evaluateGameEnd(state);
+
+    expect(state.result).toEqual({
+      type: 'victory',
+      winner: pid(0),
+      reason: 'domination',
+    });
+  });
+
+  it('does not trigger domination below 80% (3 of 5 = 60%)', () => {
+    const state = makeState({
+      cities: [
+        makeCity({ id: cid(0), owner: pid(0) }),
+        makeCity({ id: cid(1), owner: pid(0) }),
+        makeCity({ id: cid(2), owner: pid(0) }),
+        makeCity({ id: cid(3), owner: pid(1) }),
+        makeCity({ id: cid(4), owner: pid(1) }),
+      ],
+      units: [
+        makeUnit({ id: eid(0), owner: pid(0) }),
+        makeUnit({ id: eid(1), owner: pid(1) }),
+      ],
+    });
+
+    evaluateGameEnd(state);
+
+    expect(state.result).toBeNull();
+  });
+
+  it('triggers domination at exactly 80% boundary (8 of 10)', () => {
+    const state = makeState({
+      cities: [
+        ...Array.from({ length: 8 }, (_, i) =>
+          makeCity({ id: cid(i), owner: pid(0) }),
+        ),
+        makeCity({ id: cid(8), owner: pid(1) }),
+        makeCity({ id: cid(9), owner: pid(1) }),
+      ],
+      units: [
+        makeUnit({ id: eid(0), owner: pid(0) }),
+        makeUnit({ id: eid(1), owner: pid(1) }),
+      ],
+    });
+
+    evaluateGameEnd(state);
+
+    expect(state.result).toEqual({
+      type: 'victory',
+      winner: pid(0),
+      reason: 'domination',
+    });
+  });
+
+  it('does not trigger domination just below boundary (7 of 10 = 70%)', () => {
+    const state = makeState({
+      cities: [
+        ...Array.from({ length: 7 }, (_, i) =>
+          makeCity({ id: cid(i), owner: pid(0) }),
+        ),
+        makeCity({ id: cid(7), owner: pid(1) }),
+        makeCity({ id: cid(8), owner: pid(1) }),
+        makeCity({ id: cid(9), owner: pid(1) }),
+      ],
+      units: [
+        makeUnit({ id: eid(0), owner: pid(0) }),
+        makeUnit({ id: eid(1), owner: pid(1) }),
+      ],
+    });
+
+    evaluateGameEnd(state);
+
+    expect(state.result).toBeNull();
+  });
+
   it('returns null result when game is still in progress', () => {
     const state = makeState({
       cities: [
