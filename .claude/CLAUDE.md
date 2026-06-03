@@ -145,6 +145,7 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 
 詳細仕様は`.claude/wiki/index.md`参照。該当サブシステム作業時にReadで参照。
 **★MUST NOT: 全ページを一度に読み込まない。必要なページのみ読む。**
+**★MUST: wiki探索は index.md 階層を辿る（root→各dir index→個別ページ）。grep横断は「横断的に見て」と明示された時のみ。**
 
 ---
 
