@@ -8,20 +8,22 @@ import type {
   Player,
   PlayerId,
   Unit,
+  UnitKind,
 } from './types.js';
 
 const UNITS_PER_PLAYER = 10;
 const TERRAIN_MOUNTAIN = 1;
-const TERRAIN_WATER = 3;
 
 function isImpassable(terrain: number): boolean {
-  return terrain === TERRAIN_MOUNTAIN || terrain === TERRAIN_WATER;
+  // Only mountains block movement for every unit; forest/water are traversable
+  // (at higher A* cost — see pathfinding/astar.ts TERRAIN_COST_*).
+  return terrain === TERRAIN_MOUNTAIN;
 }
 
 function isValidPos(map: MapDef, x: number, y: number): boolean {
   if (x < 0 || x >= map.width || y < 0 || y >= map.height) return false;
-  const ix = Math.floor(y) * map.width + Math.floor(x);
-  return !isImpassable(map.terrain[ix]!);
+  const t = map.terrain[Math.floor(y) * map.width + Math.floor(x)]!;
+  return !isImpassable(t);
 }
 
 export function createInitialState(
@@ -52,34 +54,36 @@ export function createInitialState(
     const spawnCity = map.cities.find((c) => c.id === spawn.cityId);
     if (!spawnCity) continue;
 
-    let count = 0;
+    let supplyAdded = 0;
 
     if (spawn.unitPositions && spawn.unitPositions.length > 0) {
       // Explicit positions from map data
       for (const pos of spawn.unitPositions) {
+        const kind: UnitKind = pos.kind ?? spawn.kind ?? 'light';
         if (!isValidPos(map, pos.x, pos.y)) continue;
         units.push({
           id: nextId as EntityId,
           owner: spawn.player,
-          kind: 'light',
+          kind,
           homeCity: spawn.cityId,
           pos: { x: pos.x, y: pos.y },
-          hp: UNIT_STATS.light.hp,
+          hp: UNIT_STATS[kind].hp,
           path: null,
           goal: null,
           attackCooldownTicks: 0,
         });
         nextId++;
-        count++;
+        supplyAdded += UNIT_STATS[kind].supplyCost;
       }
     } else {
       // Fallback: scatter near spawn city using RNG
+      const kind: UnitKind = spawn.kind ?? 'light';
       const radius = 5;
       const needed = UNITS_PER_PLAYER;
       const candidates: { x: number; y: number }[] = [];
       for (let y = 0; y < map.height; y++) {
         for (let x = 0; x < map.width; x++) {
-          if (isImpassable(map.terrain[y * map.width + x]!)) continue;
+          if (!isValidPos(map, x, y)) continue;
           const dx = x - spawnCity.pos.x;
           const dy = y - spawnCity.pos.y;
           if (Math.sqrt(dx * dx + dy * dy) <= radius) {
@@ -98,24 +102,24 @@ export function createInitialState(
         units.push({
           id: nextId as EntityId,
           owner: spawn.player,
-          kind: 'light',
+          kind,
           homeCity: spawn.cityId,
           pos: { x: pos.x, y: pos.y },
-          hp: UNIT_STATS.light.hp,
+          hp: UNIT_STATS[kind].hp,
           path: null,
           goal: null,
           attackCooldownTicks: 0,
         });
         nextId++;
         placed++;
-        count++;
+        supplyAdded += UNIT_STATS[kind].supplyCost;
         candidates.splice(idx, 1);
       }
     }
 
     const city = cities.find((c) => c.id === spawn.cityId);
     if (city) {
-      city.supplyUsed = count;
+      city.supplyUsed += supplyAdded;
     }
   }
 

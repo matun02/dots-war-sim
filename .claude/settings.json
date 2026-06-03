@@ -41,6 +41,15 @@
             "command": "case \"$CLAUDE_TOOL_INPUT_FILE_PATH\" in *.env*) echo 'BLOCKED: .env ファイルの直接編集は禁止されています' >&2; exit 1;; esac"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); case \"$input\" in *'git commit'*) cd \"$CLAUDE_PROJECT_DIR\" || exit 2; pnpm -r typecheck || { echo 'pre-commit BLOCKED: typecheck failed' >&2; exit 2; }; pnpm -r test || { echo 'pre-commit BLOCKED: test failed' >&2; exit 2; }; pnpm lint || { echo 'pre-commit BLOCKED: lint failed' >&2; exit 2; };; esac; exit 0"
+          }
+        ]
       }
     ]
   }

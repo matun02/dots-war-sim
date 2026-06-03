@@ -118,7 +118,7 @@ describe('moveUnits', () => {
     expect(unit.pos.y).toBe(5);
   });
 
-  it('light unit travels ~4 cells in 30 ticks via fallback', () => {
+  it('light unit travels ~2 cells in 30 ticks via fallback', () => {
     const unit = makeUnit({
       pos: { x: 0, y: 0 },
       goal: { x: 100, y: 0 },
@@ -130,7 +130,40 @@ describe('moveUnits', () => {
       moveUnits(state);
     }
 
-    expect(unit.pos.x).toBeCloseTo(4, 1);
+    expect(unit.pos.x).toBeCloseTo(2, 1);
+  });
+
+  it('light moves at 50% speed on water (~1 cell in 30 ticks)', () => {
+    const unit = makeUnit({
+      pos: { x: 0, y: 0 },
+      goal: { x: 100, y: 0 },
+      path: null,
+    });
+    const state = makeState([unit]);
+    state.map.terrain = Array.from({ length: 64 * 36 }, () => 3); // all water
+
+    for (let i = 0; i < 30; i++) {
+      moveUnits(state);
+    }
+
+    expect(unit.pos.x).toBeCloseTo(1, 1);
+  });
+
+  it('heavy moves at 75% speed on forest (~0.75 cells in 30 ticks)', () => {
+    const unit = makeUnit({
+      kind: 'heavy',
+      pos: { x: 0, y: 0 },
+      goal: { x: 100, y: 0 },
+      path: null,
+    });
+    const state = makeState([unit]);
+    state.map.terrain = Array.from({ length: 64 * 36 }, () => 2); // all forest
+
+    for (let i = 0; i < 30; i++) {
+      moveUnits(state);
+    }
+
+    expect(unit.pos.x).toBeCloseTo(0.75, 1);
   });
 
   it('stops at goal when fallback distance < 0.05', () => {

@@ -77,6 +77,32 @@ function makeExplicitPositionMap(): MapDef {
   };
 }
 
+function makeHeavySpawnMap(): MapDef {
+  return {
+    id: 'test-heavy',
+    width: 4,
+    height: 4,
+    terrain: Array.from({ length: 16 }, () => 0),
+    cities: [
+      { id: 0 as CityId, pos: { x: 1, y: 1 }, production: 'light' as const },
+      { id: 1 as CityId, pos: { x: 3, y: 3 }, production: 'light' as const },
+    ],
+    spawns: [
+      {
+        player: 0 as PlayerId,
+        cityId: 0 as CityId,
+        kind: 'heavy',
+        unitPositions: [{ x: 0, y: 0 }, { x: 1, y: 0 }],
+      },
+      {
+        player: 1 as PlayerId,
+        cityId: 1 as CityId,
+        unitPositions: [{ x: 3, y: 0, kind: 'heavy' }, { x: 2, y: 0 }],
+      },
+    ],
+  };
+}
+
 function makePlayers(): Player[] {
   return [
     { id: 0 as PlayerId, name: 'P1', color: 0x4488ff, alive: true },
@@ -253,6 +279,40 @@ describe('createInitialState', () => {
       const p0AvgX = p0Units.reduce((s, u) => s + u.pos.x, 0) / p0Units.length;
       const p1AvgX = p1Units.reduce((s, u) => s + u.pos.x, 0) / p1Units.length;
       expect(p0AvgX).toBeLessThan(p1AvgX);
+    });
+  });
+
+  describe('initial unit kind (spawn kind attribute)', () => {
+    it('spawns heavy units via spawn-level kind, with heavy hp', () => {
+      const state = createInitialState(makeHeavySpawnMap(), makePlayers(), 7);
+      const p0 = state.units.filter((u) => u.owner === (0 as PlayerId));
+      expect(p0).toHaveLength(2);
+      for (const u of p0) {
+        expect(u.kind).toBe('heavy');
+        expect(u.hp).toBe(UNIT_STATS.heavy.hp);
+      }
+    });
+
+    it('lets per-position kind override; omitted position defaults to light', () => {
+      const state = createInitialState(makeHeavySpawnMap(), makePlayers(), 7);
+      const p1 = state.units.filter((u) => u.owner === (1 as PlayerId));
+      expect(p1).toHaveLength(2);
+      expect(p1.map((u) => u.kind).sort()).toEqual(['heavy', 'light']);
+    });
+
+    it('accumulates supplyUsed by supply cost (heavy = 2)', () => {
+      const state = createInitialState(makeHeavySpawnMap(), makePlayers(), 7);
+      const city0 = state.cities.find((c) => c.id === (0 as CityId))!;
+      expect(city0.supplyUsed).toBe(2 * UNIT_STATS.heavy.supplyCost);
+      const city1 = state.cities.find((c) => c.id === (1 as CityId))!;
+      expect(city1.supplyUsed).toBe(
+        UNIT_STATS.heavy.supplyCost + UNIT_STATS.light.supplyCost,
+      );
+    });
+
+    it('defaults every unit to light when no kind is given', () => {
+      const state = createInitialState(makeExplicitPositionMap(), makePlayers(), 7);
+      for (const u of state.units) expect(u.kind).toBe('light');
     });
   });
 });

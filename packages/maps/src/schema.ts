@@ -10,11 +10,20 @@ const CitySchema = v.object({
   owner: v.optional(v.number()),
 });
 
+const UnitKindSchema = v.picklist(['light', 'heavy']);
+
 const SpawnSchema = v.object({
   player: v.number(),
   cityId: v.number(),
+  kind: v.optional(UnitKindSchema),
   unitPositions: v.optional(
-    v.array(v.object({ x: v.number(), y: v.number() })),
+    v.array(
+      v.object({
+        x: v.number(),
+        y: v.number(),
+        kind: v.optional(UnitKindSchema),
+      }),
+    ),
   ),
 });
 

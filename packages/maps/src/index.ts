@@ -6,6 +6,7 @@ import bridgeJson from './data/bridge.json';
 import fourCornersJson from './data/four-corners.json';
 import straitJson from './data/strait.json';
 import corridorJson from './data/corridor.json';
+import velnCorridorJson from './data/veln-corridor.json';
 
 export {
   firstBloodJson,
@@ -13,6 +14,7 @@ export {
   fourCornersJson,
   straitJson,
   corridorJson,
+  velnCorridorJson,
 };
 
 export interface MapCatalogEntry {
@@ -28,6 +30,7 @@ export const MAP_CATALOG: readonly MapCatalogEntry[] = [
   { id: 'four-corners', name: 'Four Corners', size: '48×48' },
   { id: 'strait', name: 'Strait', size: '64×36' },
   { id: 'corridor', name: 'Corridor', size: '64×36' },
+  { id: 'veln-corridor', name: 'Veln Corridor', size: '64×36' },
 ];
 
 const MAP_JSON: Record<string, unknown> = {
@@ -36,6 +39,7 @@ const MAP_JSON: Record<string, unknown> = {
   'four-corners': fourCornersJson,
   strait: straitJson,
   corridor: corridorJson,
+  'veln-corridor': velnCorridorJson,
 };
 
 /**

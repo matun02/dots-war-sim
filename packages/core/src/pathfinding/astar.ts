@@ -15,8 +15,10 @@ const DIRS: readonly (readonly [number, number, number])[] = [
   [-1, -1, COST_DIAGONAL],
 ];
 
-const TERRAIN_COST_LIGHT: readonly number[] = [1, 3, 2, -1, 1];
-const TERRAIN_COST_HEAVY: readonly number[] = [1, -1, -1, -1, 1];
+// Index = terrain value (0=plain, 1=mountain, 2=forest, 3=water, 4=city). -1 = impassable.
+// Mountains are walls for everyone; forest/water are traversable at higher cost.
+const TERRAIN_COST_LIGHT: readonly number[] = [1, -1, 1, 2, 1];
+const TERRAIN_COST_HEAVY: readonly number[] = [1, -1, 2, 2, 1];
 
 interface Node {
   f: number;

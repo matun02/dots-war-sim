@@ -145,6 +145,7 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 
 詳細仕様は`.claude/wiki/index.md`参照。該当サブシステム作業時にReadで参照。
 **★MUST NOT: 全ページを一度に読み込まない。必要なページのみ読む。**
+**★MUST: wiki探索は index.md 階層を辿る（root→各dir index→個別ページ）。grep横断は「横断的に見て」と明示された時のみ。**
 
 ---
 
@@ -152,6 +153,6 @@ Sim: 固定30Hz (`TICK_DT = 1000/30`)。Render: `requestAnimationFrame`(補間�
 
 | 日付 | 変更 |
 |---|---|
-| 2026-05-30 | P2-T5 完了（新規マップ4枚+選択UI、ビューポートfit対応）。maps テスト27件追加（合計223件） |
-| 2026-05-28 | LLM Wiki 3層化。CLAUDE.md/DESIGN.md スリム化、wiki/ 56ファイル作成 |
-| 2026-05-25 | P2-T4.3 完了（中央配置・後方都市・中立削除・HP5倍）。テスト合計186件 |
+| 2026-06-03 | P2-T7 完了（commit `60c7b17`）。`evaluate-game-end.ts` の domination 勝利を全都市(100%)→80%以上に変更（整数演算 `owned*5>=total*4` で決定論維持）。影響マップ都市重み(CITY_WEIGHT=300)は P2-T4.1 で実装済みのため確認のみ。core テスト+4(166)。M4 は P2-T6 のみ残 |
+| 2026-06-02 | PR #4 Codex 指摘対応。`separate-units.ts` の `isImpassable` が water を壁扱いしていたのを mountain のみに修正（A*/init と統一。water 上で重なったユニットが分離不能だったバグ）。separate-units テスト+1。全テスト緑(core162/maps43/web36) |
+| 2026-06-02 | 地形による移動速度倍率を追加（`TERRAIN_SPEED_PCT`: water light/heavy 50%・forest heavy 75%、乗っているタイルで判定。移動コスト＝経路選択とは別軸）。`constants.ts`＋`move-units.ts`、move-unitsテスト+2。全テスト緑(core161/maps43/web36) |

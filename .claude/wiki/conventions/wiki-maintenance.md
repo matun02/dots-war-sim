@@ -15,6 +15,7 @@ wiki 更新スキル (`skill-wiki-sync.md`, `skill-wiki-audit.md`) が参照す�
 | `core/src/sim/tick.ts` | `sim/tick-steps.md` |
 | `core/src/sim/rng.ts` | `sim/rng.md` |
 | `core/src/pathfinding/` | `pathfinding/*` |
+| 地形ルール: `pathfinding/astar.ts`(コスト)・`sim/types.ts` TERRAIN_INDEX(値)・`sim/steps/move-units.ts`(速度) | `game-rules/units.md`「地形ルール」節 ＋ `pathfinding/astar.md` |
 | `web/src/game/ai/` | `ai/*` |
 | `web/src/game/render/` | `ui/layout.md` |
 | `web/src/game/input/` | `ui/input-*.md` |

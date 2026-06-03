@@ -125,6 +125,21 @@ describe('separateUnits', () => {
     expect(state.units[1]!.pos.x).toBeGreaterThan(5);
   });
 
+  it('separates units on water (water is passable per terrain rules)', () => {
+    const terrain = Array.from({ length: 400 }, () => 3); // all water
+    const u0 = makeUnit({ id: 0 as EntityId, pos: { x: 5, y: 5 } });
+    const u1 = makeUnit({ id: 1 as EntityId, pos: { x: 5.2, y: 5 } });
+    const state = makeState([u0, u1], terrain);
+
+    separateUnits(state);
+
+    const dist = Math.sqrt(
+      (state.units[0]!.pos.x - state.units[1]!.pos.x) ** 2 +
+        (state.units[0]!.pos.y - state.units[1]!.pos.y) ** 2,
+    );
+    expect(dist).toBeGreaterThanOrEqual(0.6 - 1e-9);
+  });
+
   it('does not affect units far apart', () => {
     const u0 = makeUnit({ id: 0 as EntityId, pos: { x: 2, y: 2 } });
     const u1 = makeUnit({ id: 1 as EntityId, pos: { x: 10, y: 10 } });
